@@ -6,6 +6,7 @@ import com.propellerads.sdk.BuildConfig
 import com.propellerads.sdk.api.ApiConfig
 import com.propellerads.sdk.api.ApiErrorParser
 import com.propellerads.sdk.api.IApi
+import com.propellerads.sdk.api.MockApi
 import com.propellerads.sdk.configurator.AdConfigurator
 import com.propellerads.sdk.configurator.IAdConfigurator
 import com.propellerads.sdk.provider.adId.AdIdProvider
@@ -40,8 +41,8 @@ internal object DI {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    private val api: IApi = retrofit.create(IApi::class.java)
-//    private val api: IApi = MockApi()
+//    private val api: IApi = retrofit.create(IApi::class.java)
+    private val api: IApi = MockApi()
 
     private val errorParser: IErrorParser = ApiErrorParser()
 

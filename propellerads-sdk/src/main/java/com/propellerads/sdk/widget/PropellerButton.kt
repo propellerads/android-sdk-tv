@@ -128,6 +128,10 @@ class PropellerButton @JvmOverloads constructor(
             button.setShadowLayer(3.dp, 1.dp, 1.dp, Colors.from(appearance.buttonLabelShadowColor))
         }
         button.isAllCaps = appearance.buttonLabelAllCaps
+        val paddingDp = appearance.horizontalPadding.dp.toInt()
+        if (paddingDp > 0) {
+            button.setPadding(paddingDp, 0, paddingDp, 0)
+        }
 
         val gradientDrawable = if (appearance.buttonColors.size > 2) {
             val gradientColors = appearance.buttonColors.map(Colors::from).toIntArray()

@@ -17,6 +17,7 @@ internal data class WidgetAppearance(
     val buttonRadius: Int,
     val buttonColors: List<String>,
     val buttonLabelAllCaps: Boolean,
+    val horizontalPadding: Int,
 )
 
 internal object OK

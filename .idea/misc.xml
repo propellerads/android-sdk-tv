@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="propellerads-sdk/src/main/res/layout/propeller_button_layout.xml" value="0.1887031408308004" />
         <entry key="sample-app/src/main/res/layout/activity_main.xml" value="0.22327898550724637" />
       </map>
     </option>

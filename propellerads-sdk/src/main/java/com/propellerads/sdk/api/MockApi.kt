@@ -20,7 +20,7 @@ internal class MockApi : IApi {
         return SettingsRes(
             widgets = listOf(
                 WidgetRes(
-                    id = "widget2",
+                    id = "test_widget_1",
                     zone = 140,
                     experimentBranchId = 220,
                     targetUrl = "http://google.com",
@@ -35,6 +35,26 @@ internal class MockApi : IApi {
                         buttonRadius = 4,
                         buttonColors = listOf("#4AAE98"),
                         buttonLabelAllCaps = false,
+                        horizontalPadding = 0,
+                    )
+                ),
+                WidgetRes(
+                    id = "test_widget_2",
+                    zone = 140,
+                    experimentBranchId = 220,
+                    targetUrl = "http://google.com",
+                    impressionUrl = "https://domain.com/test",
+                    settings = WidgetSettingsRes(
+                        buttonLabel = "Hello Ad Button",
+                        buttonLabelSize = 18,
+                        buttonLabelColor = "#AE4A60",
+                        isButtonLabelBold = false,
+                        isButtonLabelItalic = false,
+                        buttonLabelShadowColor = "",
+                        buttonRadius = 4,
+                        buttonColors = listOf("#4AAE98"),
+                        buttonLabelAllCaps = false,
+                        horizontalPadding = 48,
                     )
                 )
             )

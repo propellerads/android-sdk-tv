@@ -33,6 +33,7 @@ internal data class WidgetSettingsRes(
     val buttonRadius: Int,
     val buttonColors: List<String>,
     val buttonLabelAllCaps: Boolean,
+    val horizontalPadding: Int,
 ) : Mappable<WidgetAppearance> {
     override fun map() = WidgetAppearance(
         buttonLabel,
@@ -44,6 +45,7 @@ internal data class WidgetSettingsRes(
         buttonRadius,
         buttonColors,
         buttonLabelAllCaps,
+        horizontalPadding,
     )
 }
 
