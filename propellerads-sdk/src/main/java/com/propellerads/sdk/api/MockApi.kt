@@ -26,18 +26,19 @@ internal class MockApi : IApi {
                     targetUrl = "http://google.com",
                     impressionUrl = "https://domain.com/test",
                     settings = WidgetSettingsRes(
-                        buttonLabel = "Hello Ad Button",
+                        buttonLabel = "Download Now",
                         buttonLabelSize = 18,
-                        buttonLabelColor = "#AE4A60",
-                        isButtonLabelBold = false,
+                        buttonLabelColor = "#FFFFFF",
+                        isButtonLabelBold = true,
                         isButtonLabelItalic = false,
-                        buttonLabelShadowColor = "",
-                        buttonRadius = 4,
-                        buttonColors = listOf("#4AAE98"),
+                        buttonLabelShadowColor = "#40000000",
+                        buttonRadius = 0,
+                        buttonColors = listOf("#B2D96D", "#789F32"),
                         buttonLabelAllCaps = false,
-                        horizontalPadding = 0,
+                        horizontalPadding = 54,
+                        verticalPadding = 7,
                     )
-                ),
+        ),
                 WidgetRes(
                     id = "test_widget_2",
                     zone = 140,
@@ -54,7 +55,8 @@ internal class MockApi : IApi {
                         buttonRadius = 4,
                         buttonColors = listOf("#4AAE98"),
                         buttonLabelAllCaps = false,
-                        horizontalPadding = 48,
+                        horizontalPadding = 0,
+                        verticalPadding = 0,
                     )
                 )
             )

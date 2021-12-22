@@ -128,12 +128,8 @@ class PropellerButton @JvmOverloads constructor(
             button.setShadowLayer(3.dp, 1.dp, 1.dp, Colors.from(appearance.buttonLabelShadowColor))
         }
         button.isAllCaps = appearance.buttonLabelAllCaps
-        val paddingDp = appearance.horizontalPadding.dp.toInt()
-        if (paddingDp > 0) {
-            button.setPadding(paddingDp, 0, paddingDp, 0)
-        }
 
-        val gradientDrawable = if (appearance.buttonColors.size > 2) {
+        val gradientDrawable = if (appearance.buttonColors.size > 1) {
             val gradientColors = appearance.buttonColors.map(Colors::from).toIntArray()
             GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, gradientColors)
         } else {
@@ -145,6 +141,16 @@ class PropellerButton @JvmOverloads constructor(
 
         gradientDrawable.cornerRadius = appearance.buttonRadius.dp
         button.background = gradientDrawable
+
+        val hPaddingDp = appearance.horizontalPadding.dp.toInt()
+        val vPaddingDp = appearance.verticalPadding.dp.toInt()
+        val horizontalPadding = if (hPaddingDp > 0) hPaddingDp else button.paddingLeft
+        val verticalPadding = if (vPaddingDp > 0) vPaddingDp else button.paddingTop
+        if (verticalPadding > 0) {
+            button.minHeight = 0
+            button.minimumHeight = 0
+        }
+        button.setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
 
         button.setOnClickListener {
             handleClick(widgetConfig)
