@@ -1,10 +1,6 @@
 package com.propellerads.sdk.api
 
-import com.propellerads.sdk.api.dto.DeviceTypeReq
-import com.propellerads.sdk.api.dto.OkRes
-import com.propellerads.sdk.api.dto.SettingsRes
-import com.propellerads.sdk.api.dto.WidgetRes
-import com.propellerads.sdk.api.dto.WidgetSettingsRes
+import com.propellerads.sdk.api.dto.*
 import kotlinx.coroutines.delay
 
 internal class MockApi : IApi {
@@ -38,7 +34,7 @@ internal class MockApi : IApi {
                         horizontalPadding = 54,
                         verticalPadding = 7,
                     )
-        ),
+                ),
                 WidgetRes(
                     id = "test_widget_2",
                     zone = 140,
@@ -59,6 +55,35 @@ internal class MockApi : IApi {
                         verticalPadding = 0,
                     )
                 )
+            ),
+            banners = listOf(
+                BannerRes(
+                    id = "test_banner",
+                    zone = 140,
+                    experimentBranchId = 220,
+                    targetUrl = "http://google.com",
+                    settings = BannerSettingsRes(
+                        layoutTemplate = "qr_code_3_1",
+                        positionOnScreen = "bottom",
+                        isFullWidth = true,
+                        isFullHeight = false,
+                        hasRoundedCorners = false,
+                        titleLabel = "Confirm you're not a robot",
+                        descriptionLabel = "Scan the qr-code with your phone",
+                        extraDescriptionLabel = "QR-CAPTCHA",
+                        titleColor = "#29BFFF",
+                        descriptionColor = "#000000",
+                        extraDescriptionColor = "#4D000000",
+                        backgroundColor = "#FFFFFF",
+                        qrCodeColor = "#000000",
+                        dismissTimerValue = 5_000,
+                        dismissTimerVisibility = false,
+                        interval = 10_000,
+                        timeout = 5_000,
+                        frequency = 3,
+                        capping = 50_000,
+                    )
+                )
             )
         )
     }
@@ -70,4 +95,3 @@ internal class MockApi : IApi {
         return OkRes
     }
 }
-

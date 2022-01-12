@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.browser.customtabs.CustomTabsIntent
 import com.propellerads.sdk.R
-import com.propellerads.sdk.configurator.AdConfigState
+import com.propellerads.sdk.configurator.AdConfigStatus
 import com.propellerads.sdk.di.DI
 import com.propellerads.sdk.repository.WidgetConfig
 import com.propellerads.sdk.utils.*
@@ -34,7 +34,6 @@ class PropellerButton @JvmOverloads constructor(
     private val coroutineScope = object : CoroutineScope {
         override val coroutineContext: CoroutineContext
             get() = job + Dispatchers.Main
-
     }
 
     private val adConfigurator = DI.adConfigurator
@@ -78,20 +77,20 @@ class PropellerButton @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         coroutineScope.launch {
-            adConfigurator.state
+            adConfigurator.status
                 .combine(widgetIdState, ::Pair)
-                .collect(::handleConfiguration)
+                .collect(::handleConfigurationStatus)
         }
     }
 
-    private fun handleConfiguration(pair: Pair<AdConfigState, String>) {
-        val (config, widgetId) = pair
-        when (config) {
-            is AdConfigState.Loading -> {
+    private fun handleConfigurationStatus(pair: Pair<AdConfigStatus, String>) {
+        val (status, widgetId) = pair
+        when (status) {
+            is AdConfigStatus.Loading -> {
                 setContent(hasProgress = true)
             }
-            is AdConfigState.Success -> {
-                val widgetConfig = config.widgets
+            is AdConfigStatus.Success -> {
+                val widgetConfig = status.config.widgets
                     .firstOrNull { it.id == widgetId }
                 if (widgetConfig != null) {
                     configureWidget(widgetConfig)
@@ -105,8 +104,8 @@ class PropellerButton @JvmOverloads constructor(
                     setContent(hasErrorView = true)
                 }
             }
-            is AdConfigState.Error -> {
-                errorView.text = config.exception?.message ?: "API exception"
+            is AdConfigStatus.Error -> {
+                errorView.text = status.exception?.message ?: "API exception"
                 setContent(hasErrorView = true)
             }
         }

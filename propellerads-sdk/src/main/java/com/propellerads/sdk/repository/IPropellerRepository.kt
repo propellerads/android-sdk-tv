@@ -11,7 +11,7 @@ internal interface IPropellerRepository {
         publisherId: String,
         userId: String,
         deviceType: DeviceType
-    ): Flow<Resource<List<WidgetConfig>>>
+    ): Flow<Resource<AdConfiguration>>
 
     fun impressionCallback(url: String): Flow<Resource<OK>>
 }

@@ -3,10 +3,10 @@ package com.propellerads.sdk.configurator
 import com.propellerads.sdk.provider.adId.IAdIdProvider
 import com.propellerads.sdk.provider.deviceType.IDeviceTypeProvider
 import com.propellerads.sdk.provider.publisherId.IPublisherIdProvider
+import com.propellerads.sdk.repository.AdConfiguration
 import com.propellerads.sdk.repository.IPropellerRepository
 import com.propellerads.sdk.repository.OK
 import com.propellerads.sdk.repository.Resource
-import com.propellerads.sdk.repository.WidgetConfig
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,9 +29,9 @@ internal class AdConfigurator(
         const val REQUEST_TIMEOUT_MS = 5_000L
     }
 
-    private val _state = MutableStateFlow<AdConfigState>(AdConfigState.Loading)
-    override val state: Flow<AdConfigState>
-        get() = _state
+    private val _status = MutableStateFlow<AdConfigStatus>(AdConfigStatus.Loading)
+    override val status: Flow<AdConfigStatus>
+        get() = _status
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
@@ -47,7 +47,7 @@ internal class AdConfigurator(
         if (publisherId == null) {
             Logger.d(NoPublisherIdException.message!!)
             launch {
-                _state.emit(AdConfigState.Error(NoPublisherIdException))
+                _status.emit(AdConfigStatus.Error(NoPublisherIdException))
             }
             return
         }
@@ -57,17 +57,17 @@ internal class AdConfigurator(
         }
     }
 
-    private suspend fun handleSettingsRes(resource: Resource<List<WidgetConfig>>) {
+    private suspend fun handleSettingsRes(resource: Resource<AdConfiguration>) {
         when (resource) {
             is Resource.Loading -> {
-                _state.emit(AdConfigState.Loading)
+                _status.emit(AdConfigStatus.Loading)
             }
             is Resource.Success -> {
-                _state.emit(AdConfigState.Success(resource.data))
+                _status.emit(AdConfigStatus.Success(resource.data))
             }
             is Resource.Fail -> {
                 Logger.d("Ad Settings exception: ${resource.exception?.message ?: "Unknown exception"}")
-                _state.emit(AdConfigState.Error(AdSettingsRequestException))
+                _status.emit(AdConfigStatus.Error(AdSettingsRequestException))
                 tryAgain(resource.exception, REQUEST_TIMEOUT_MS, "Ad Settings", ::getConfiguration)
             }
         }
@@ -75,6 +75,7 @@ internal class AdConfigurator(
 
     override fun impressionCallback(url: String) {
         launch {
+            Logger.d("Invoke impression callback: $url")
             repository.impressionCallback(url)
                 .collect { res ->
                     handleImpressionRes(url, res)
@@ -102,10 +103,10 @@ internal class AdConfigurator(
     }
 }
 
-internal sealed class AdConfigState {
-    object Loading : AdConfigState()
-    data class Success(val widgets: List<WidgetConfig>) : AdConfigState()
-    data class Error(val exception: Exception?) : AdConfigState()
+internal sealed class AdConfigStatus {
+    object Loading : AdConfigStatus()
+    data class Success(val config: AdConfiguration) : AdConfigStatus()
+    data class Error(val exception: Exception?) : AdConfigStatus()
 }
 
 internal object NoPublisherIdException : Exception(

@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 internal interface IAdConfigurator {
 
-    val state: Flow<AdConfigState>
+    val status: Flow<AdConfigStatus>
 
     fun impressionCallback(url: String)
 }

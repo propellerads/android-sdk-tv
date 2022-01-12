@@ -9,6 +9,8 @@ import com.propellerads.sdk.api.IApi
 import com.propellerads.sdk.api.MockApi
 import com.propellerads.sdk.configurator.AdConfigurator
 import com.propellerads.sdk.configurator.IAdConfigurator
+import com.propellerads.sdk.bannedAd.bannerManager.BannerManager
+import com.propellerads.sdk.bannedAd.bannerManager.IBannerManager
 import com.propellerads.sdk.provider.adId.AdIdProvider
 import com.propellerads.sdk.provider.adId.IAdIdProvider
 import com.propellerads.sdk.provider.deviceType.DeviceTypeProvider
@@ -41,8 +43,8 @@ internal object DI {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    private val api: IApi = retrofit.create(IApi::class.java)
-//    private val api: IApi = MockApi()
+//    private val api: IApi = retrofit.create(IApi::class.java)
+    private val api: IApi = MockApi()
 
     private val errorParser: IErrorParser = ApiErrorParser()
 
@@ -53,6 +55,8 @@ internal object DI {
     val adConfigurator: IAdConfigurator
         get() = _adConfigurator
 
+    val bannerManager: IBannerManager = BannerManager()
+
     fun init(context: Context) {
         val adIdProvider: IAdIdProvider = AdIdProvider(context)
         val publisherIdProvider: IPublisherIdProvider = PublisherIdProvider(context)
@@ -62,8 +66,7 @@ internal object DI {
             repo,
             adIdProvider,
             publisherIdProvider,
-            deviceTypeProvider
-
+            deviceTypeProvider,
         )
     }
 }
