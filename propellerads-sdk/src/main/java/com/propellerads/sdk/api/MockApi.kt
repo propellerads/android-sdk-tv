@@ -61,7 +61,7 @@ internal class MockApi : IApi {
                     id = "test_banner",
                     zone = 140,
                     experimentBranchId = 220,
-                    targetUrl = "http://google.com",
+                    targetUrl = "https://www.google.com",
                     settings = BannerSettingsRes(
                         layoutTemplate = "qr_code_3_1",
                         positionOnScreen = "bottom",
@@ -75,7 +75,7 @@ internal class MockApi : IApi {
                         descriptionColor = "#000000",
                         extraDescriptionColor = "#4D000000",
                         backgroundColor = "#FFFFFF",
-                        qrCodeColor = "#000000",
+                        qrCodeColor = "#789F32",
                         dismissTimerValue = 5_000,
                         dismissTimerVisibility = false,
                         interval = 10_000,

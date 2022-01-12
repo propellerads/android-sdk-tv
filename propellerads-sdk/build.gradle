@@ -47,6 +47,7 @@ android {
         }
     }
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -63,6 +64,7 @@ dependencies {
     // Android
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
@@ -75,6 +77,7 @@ dependencies {
     // Other
     implementation "androidx.startup:startup-runtime:1.1.0"
     implementation "androidx.browser:browser:1.4.0"
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
 
     // Test
     testImplementation 'junit:junit:4.13.2'

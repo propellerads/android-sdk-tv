@@ -1,16 +1,19 @@
 package com.propellerads.sdk.bannedAd.ui
 
+import android.widget.ImageView
 import androidx.viewbinding.ViewBinding
 import com.propellerads.sdk.databinding.PropellerBannerQrBinding
-import com.propellerads.sdk.repository.BannerAppearance
+import com.propellerads.sdk.repository.BannerConfig
 import com.propellerads.sdk.utils.Colors
+import com.propellerads.sdk.utils.qrGen.QrGen
 
-internal fun ViewBinding.configure(appearance: BannerAppearance) = when (this) {
-    is PropellerBannerQrBinding -> applyStyle(appearance)
+internal fun ViewBinding.configure(config: BannerConfig) = when (this) {
+    is PropellerBannerQrBinding -> applyStyle(config)
     else -> Unit
 }
 
-internal fun PropellerBannerQrBinding.applyStyle(appearance: BannerAppearance) {
+internal fun PropellerBannerQrBinding.applyStyle(config: BannerConfig) {
+    val appearance = config.appearance
     title.text = appearance.titleLabel
     title.setTextColor(Colors.from(appearance.titleColor))
     description.text = appearance.descriptionLabel
@@ -18,5 +21,12 @@ internal fun PropellerBannerQrBinding.applyStyle(appearance: BannerAppearance) {
     extraDescription.text = appearance.extraDescriptionLabel
     extraDescription.setTextColor(Colors.from(appearance.extraDescriptionColor))
     root.setBackgroundColor(Colors.from(appearance.backgroundColor))
-//  todo: generate qrCode
+    qrCode.apply {
+        val qrBitmap = QrGen.generate(
+            config.targetUrl,
+            appearance.qrCodeColor
+        )
+        scaleType = ImageView.ScaleType.FIT_XY
+        setImageBitmap(qrBitmap)
+    }
 }

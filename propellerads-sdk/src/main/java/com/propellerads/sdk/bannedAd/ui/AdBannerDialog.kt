@@ -61,7 +61,7 @@ internal class AdBannerDialog private constructor() :
         val binding = when (config.appearance.layoutTemplate) {
             "qr_code_3_1" -> PropellerBannerQrBinding.inflate(inflater)
             else -> PropellerBannerQrBinding.inflate(inflater)    // todo: figure out what to do
-        }.apply { configure(config.appearance) }
+        }.apply { configure(config) }
 
         return binding.root
     }
