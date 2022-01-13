@@ -1,5 +1,6 @@
 package com.propellerads.adapp
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.propellerads.adapp.databinding.ActivityMainBinding
@@ -14,9 +15,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         PropellerBannerRequest(
-            "test_banner",
+            "test_banner_1",
             lifecycle,
             supportFragmentManager
         )
+
+        binding.next.setOnClickListener {
+            val intent = Intent(this, SecondActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

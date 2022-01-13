@@ -29,4 +29,12 @@
         android:layout_margin="32dp"
         app:widget_id="download_now_button" />
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="32dp"
+        android:text="Go to the next Activity" />
+
 </LinearLayout>
