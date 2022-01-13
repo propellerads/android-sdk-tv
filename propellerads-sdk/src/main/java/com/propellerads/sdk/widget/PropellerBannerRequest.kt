@@ -11,6 +11,7 @@ import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import java.lang.ref.WeakReference
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 class PropellerBannerRequest(
@@ -29,13 +30,15 @@ class PropellerBannerRequest(
             get() = job + Dispatchers.Main
     }
 
+    private val requestUUID = UUID.randomUUID()
+
     private val weakFM = WeakReference(fragmentManager)
 
     @Volatile
-    private var isRequestExecuted = false
+    private var bannerConfig: BannerConfig? = null
 
     init {
-        Logger.d("Created ${this::class.simpleName} with adId: $adId", TAG)
+        Logger.d("Created request with Config id: $adId", TAG)
         lifecycle.addObserver(this)
     }
 
@@ -43,14 +46,14 @@ class PropellerBannerRequest(
         source: LifecycleOwner, event: Lifecycle.Event
     ) = when (event) {
         Lifecycle.Event.ON_RESUME -> onLifecycleResume()
-        Lifecycle.Event.ON_PAUSE -> onLifecyclePause()
+        Lifecycle.Event.ON_STOP -> onLifecycleStop()
         else -> Unit
     }
 
     private fun onLifecycleResume() {
-        if (!isRequestExecuted) {
-            obtainConfiguration()
-        }
+        Logger.d("Resume request $requestUUID", TAG)
+        bannerConfig?.let(::handleAdConfiguration)
+            ?: obtainConfiguration()
     }
 
     private fun obtainConfiguration() {
@@ -65,18 +68,22 @@ class PropellerBannerRequest(
             status.config.banners
                 .firstOrNull { it.id == adId }
                 ?.let { config ->
+                    bannerConfig = config
                     handleAdConfiguration(config)
-                    isRequestExecuted = true
                 }
         }
     }
 
     private fun handleAdConfiguration(config: BannerConfig) {
-        Logger.d("Banner config for adId: $adId dispatched to ${DI.bannerManager::class.simpleName}", TAG)
-        DI.bannerManager.dispatchConfig(config, weakFM)
+        Logger.d("Dispatch Banner config id: $adId", TAG)
+        DI.bannerManager.dispatchConfig(requestUUID, config, weakFM)
     }
 
-    private fun onLifecyclePause() {
+    private fun onLifecycleStop() {
+        Logger.d("Cancel request  $requestUUID", TAG)
         job.cancelChildren()
+
+        Logger.d("Revoke banner config id: $adId", TAG)
+        DI.bannerManager.revokeConfig(requestUUID)
     }
 }

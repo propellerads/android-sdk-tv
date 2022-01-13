@@ -9,7 +9,7 @@ internal interface ILogger {
 
 internal object Logger : ILogger {
 
-    private const val TAG = "PropellerAdsSDK"
+    private const val TAG = "AdSDK"
 
     override fun d(message: String, suffix: String?) {
         val tag = suffix?.let { "${TAG}_$suffix" } ?: TAG

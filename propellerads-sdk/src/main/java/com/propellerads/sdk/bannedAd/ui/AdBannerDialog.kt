@@ -81,6 +81,7 @@ internal class AdBannerDialog private constructor() :
 
             decorView.apply {
 
+                // todo: use cornerRadius and background drawable instead
                 if (!appearance.hasRoundedCorners) {
                     // remove dialog corner radius
                     val background = Colors.from(appearance.backgroundColor)

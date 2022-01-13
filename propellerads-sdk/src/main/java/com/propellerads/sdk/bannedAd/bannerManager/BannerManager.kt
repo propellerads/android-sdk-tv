@@ -1,6 +1,10 @@
 package com.propellerads.sdk.bannedAd.bannerManager
 
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.propellerads.sdk.bannedAd.bannerManager.bannerDismissListener.BannerDismissListener
 import com.propellerads.sdk.bannedAd.bannerManager.impressionHistory.IImpressionHistory
 import com.propellerads.sdk.bannedAd.bannerManager.impressionHistory.ImpressionHistory
@@ -12,19 +16,22 @@ import com.propellerads.sdk.repository.ImpressionConfig
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.*
 import java.lang.ref.WeakReference
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
-internal class BannerManager : CoroutineScope, IBannerManager {
+internal class BannerManager :
+    IBannerManager, CoroutineScope, LifecycleEventObserver {
 
     private companion object {
         const val DISPLAY_NOW_THRESHOLD = 500L
         const val TAG = "Banner"
     }
 
-    // todo: restart after app resume
-    private val job = Job() // todo: app lifecycle
+    private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
+
+    private val activeConfigs = mutableMapOf<UUID, BannerConfig>()
 
     private val impressionHistory: IImpressionHistory = ImpressionHistory()
 
@@ -32,15 +39,33 @@ internal class BannerManager : CoroutineScope, IBannerManager {
 
     private val bannerDismissListener = BannerDismissListener(::scheduleBannerImpression)
 
+    init {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+    }
+
+    @Synchronized
     override fun dispatchConfig(
+        requestUUID: UUID,
         config: BannerConfig,
         fm: WeakReference<FragmentManager>
     ) {
-        fm.get()?.run {
-            unregisterFragmentLifecycleCallbacks(bannerDismissListener)
-            registerFragmentLifecycleCallbacks(bannerDismissListener, false)
+        if (!activeConfigs.containsKey(requestUUID)) {
+            activeConfigs[requestUUID] = config
+            fm.get()?.run {
+                unregisterFragmentLifecycleCallbacks(bannerDismissListener)
+                registerFragmentLifecycleCallbacks(bannerDismissListener, false)
+            }
+            scheduleBannerImpression(config, fm)
+        } else {
+            Logger.d("Already dispatched. Config id: ${config.id}", TAG)
         }
-        scheduleBannerImpression(config, fm)
+    }
+
+    @Synchronized
+    override fun revokeConfig(requestUUID: UUID) {
+        activeConfigs.remove(requestUUID)?.let {
+            Logger.d("Banner revoked. Config id: ${it.id}", TAG)
+        }
     }
 
     private fun scheduleBannerImpression(
@@ -55,7 +80,7 @@ internal class BannerManager : CoroutineScope, IBannerManager {
         if (timeToNextImpression < DISPLAY_NOW_THRESHOLD) {
             displayBanner(config, fm)
         } else {
-            Logger.d("Banner for config ${config.id} scheduled in ${timeToNextImpression / 1000} sec", TAG)
+            Logger.d("Banner for config ${config.id} scheduled in ${timeToNextImpression / 1000.0} sec", TAG)
             launch {
                 delay(timeToNextImpression)
                 displayBanner(config, fm)
@@ -92,5 +117,13 @@ internal class BannerManager : CoroutineScope, IBannerManager {
             .show(fm)
 
         impressionHistory.add(config.id, System.currentTimeMillis())
+    }
+
+    override fun onStateChanged(
+        source: LifecycleOwner, event: Lifecycle.Event
+    ) {
+        if (event == Lifecycle.Event.ON_STOP) {
+            job.cancelChildren()
+        }
     }
 }
