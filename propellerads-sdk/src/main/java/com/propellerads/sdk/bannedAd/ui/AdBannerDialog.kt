@@ -15,6 +15,7 @@ import com.propellerads.sdk.repository.BannerConfig
 import com.propellerads.sdk.repository.BannerGravity
 import com.propellerads.sdk.utils.Colors
 import kotlinx.coroutines.*
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 internal class AdBannerDialog private constructor() :
@@ -23,8 +24,12 @@ internal class AdBannerDialog private constructor() :
     companion object {
         const val DISMISS_THRESHOLD = 500L
 
-        fun build(config: BannerConfig) = AdBannerDialog().apply {
+        fun build(
+            requestUUID: UUID,
+            config: BannerConfig
+        ) = AdBannerDialog().apply {
             arguments = Bundle().apply {
+                putSerializable(IAdBanner.REQUEST_UUID, requestUUID)
                 putSerializable(IAdBanner.CONFIG, config)
             }
         }

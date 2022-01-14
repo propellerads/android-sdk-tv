@@ -6,9 +6,12 @@ import com.propellerads.sdk.bannedAd.ui.IAdBanner
 import com.propellerads.sdk.repository.BannerConfig
 import com.propellerads.sdk.utils.Logger
 import java.lang.ref.WeakReference
+import java.util.*
 
 internal class BannerDismissListener(
-    val onBannerDismissed: (BannerConfig, WeakReference<FragmentManager>) -> Unit
+    val onBannerDismissed: (
+        UUID, BannerConfig, WeakReference<FragmentManager>
+    ) -> Unit
 ) : FragmentManager.FragmentLifecycleCallbacks() {
 
     private companion object {
@@ -21,10 +24,13 @@ internal class BannerDismissListener(
             val config = fragment.arguments
                 ?.getSerializable(IAdBanner.CONFIG) as? BannerConfig
 
+            val requestUUID = fragment.arguments
+                ?.getSerializable(IAdBanner.REQUEST_UUID) as? UUID
+
             Logger.d("Banner with Config id: ${config?.id} dismissed", TAG)
 
-            if (config != null) {
-                onBannerDismissed(config, WeakReference(fm))
+            if (requestUUID != null && config != null) {
+                onBannerDismissed(requestUUID, config, WeakReference(fm))
             }
         }
     }
