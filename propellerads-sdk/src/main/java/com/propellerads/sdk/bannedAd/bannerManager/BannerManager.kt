@@ -55,7 +55,7 @@ internal class BannerManager :
                 unregisterFragmentLifecycleCallbacks(bannerDismissListener)
                 registerFragmentLifecycleCallbacks(bannerDismissListener, false)
             }
-            scheduleBannerImpression(config, fm)
+            scheduleBannerImpression(config, fm, isNewConfig = true)
         } else {
             Logger.d("Already dispatched. Config id: ${config.id}", TAG)
         }
@@ -71,10 +71,11 @@ internal class BannerManager :
     private fun scheduleBannerImpression(
         config: BannerConfig,
         fm: WeakReference<FragmentManager>,
+        isNewConfig: Boolean = false,
     ) {
         val displaySettings = config.impressionConfig
         val history = impressionHistory.get(config.id)
-        val nextImpressionTime = calculateNextImpressionTime(displaySettings, history)
+        val nextImpressionTime = calculateNextImpressionTime(displaySettings, history, isNewConfig)
 
         val timeToNextImpression = nextImpressionTime - System.currentTimeMillis()
         if (timeToNextImpression < DISPLAY_NOW_THRESHOLD) {
@@ -91,13 +92,16 @@ internal class BannerManager :
     private fun calculateNextImpressionTime(
         impressionConfig: ImpressionConfig,
         history: List<Long>,
+        addForcedTimeout: Boolean = false,
     ): Long = impressionTimeCalculator
         .calculateNextImpressionTime(
             interval = impressionConfig.interval,
             timeout = impressionConfig.timeout,
             maxFrequency = impressionConfig.frequency,
             capping = impressionConfig.capping,
-            history = history
+            history = history,
+            addForcedTimeout = addForcedTimeout,
+            currentTime = System.currentTimeMillis(),
         )
 
     private fun displayBanner(

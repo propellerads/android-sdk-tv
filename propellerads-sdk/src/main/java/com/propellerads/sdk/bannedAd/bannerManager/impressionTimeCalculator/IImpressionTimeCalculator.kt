@@ -8,5 +8,7 @@ interface IImpressionTimeCalculator {
         maxFrequency: Int,
         capping: Int,
         history: List<Long>,
+        addForcedTimeout: Boolean,
+        currentTime: Long,
     ): Long
 }

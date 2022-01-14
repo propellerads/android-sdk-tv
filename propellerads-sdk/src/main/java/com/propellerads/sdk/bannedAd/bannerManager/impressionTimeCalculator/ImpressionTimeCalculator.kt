@@ -17,17 +17,22 @@ internal class ImpressionTimeCalculator(
         maxFrequency: Int,
         capping: Int,
         history: List<Long>,
+        addForcedTimeout: Boolean,
+        currentTime: Long,
     ): Long {
 
-        // if no previous impressions then schedule next one after initial timeout
+        // if no previous impressions then schedule the next one after initial timeout
         if (history.isEmpty()) {
             logger.d("No previous impressions. Schedule the next with the initial timeout", TAG)
-            return System.currentTimeMillis() + timeout
+            return currentTime + timeout
         }
 
-        // calculate next impression time from last impression + interval
-        val lastWithInterval = history.last() + interval
-        val nextImpressionTime = max(lastWithInterval, System.currentTimeMillis())
+        val forcedTimeout = if (addForcedTimeout) timeout else 0
+
+        // calculate next impression time from the last impression
+        val lastWithInterval = history.last() + interval + forcedTimeout
+        val minNextImpressionTime = currentTime + forcedTimeout
+        val nextImpressionTime = max(lastWithInterval, minNextImpressionTime)
 
         // if capping or frequency parameters are not presented then return nextImpressionTime
         if (maxFrequency == 0 || capping == 0) {
@@ -35,7 +40,7 @@ internal class ImpressionTimeCalculator(
             return nextImpressionTime
         }
 
-        // check impressions in capping
+        // calculate impressions frequency in the current capping period
         val cappingStart = nextImpressionTime - capping
         val reversedHistory = history.reversed()
         val impressionsInCapping = reversedHistory.fold(
@@ -51,7 +56,7 @@ internal class ImpressionTimeCalculator(
             logger.d("Impressions: $impressionsInCapping, but max is $maxFrequency. Schedule the next with the regular interval", TAG)
             nextImpressionTime
         } else {
-            // Otherwise calculate the new capping period
+            // Otherwise calculate the new capping period start time
             val newCappingStart = reversedHistory[maxFrequency - 1]
             logger.d("Max frequency is exceeded. Schedule the next impression for the new capping period", TAG)
             newCappingStart + capping
