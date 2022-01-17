@@ -59,16 +59,13 @@ internal class BannerDialog private constructor() :
     ): View? {
         val bannerConfig = arguments?.getSerializable(IBannerConfig.CONFIG) as? IBannerConfig
         if (bannerConfig == null) {
-            dismiss()
+            dismissSafely().also { dismissSafely() }
             return null
         }
 
         return when (bannerConfig) {
             is QRBannerConfig -> configureQRBanner(inflater, bannerConfig)
-            else -> {
-                dismiss()
-                null
-            }
+            else -> null.also { dismissSafely() }
         }
     }
 
@@ -78,8 +75,8 @@ internal class BannerDialog private constructor() :
     ): View {
         val config = bannerConfig.config
 
+        calculateAutoDismissTime(config.appearance)
         configureDialogParams(config.appearance)
-        configureAutoDismiss(config.appearance)
 
         val binding = when (config.appearance.layoutTemplate) {
             "qr_code_3_1" -> PropellerBannerQrBinding.inflate(inflater)
@@ -87,6 +84,12 @@ internal class BannerDialog private constructor() :
         }.apply { configure(bannerConfig) }
 
         return binding.root
+    }
+
+    private fun calculateAutoDismissTime(appearance: BannerAppearance) {
+        val dismissValue = appearance.dismissTimerValue
+        if (dismissValue == 0L) return
+        dismissTime = System.currentTimeMillis() + dismissValue
     }
 
     private fun configureDialogParams(appearance: BannerAppearance) {
@@ -131,14 +134,6 @@ internal class BannerDialog private constructor() :
         }
     }
 
-    private fun configureAutoDismiss(appearance: BannerAppearance) {
-        val dismissValue = appearance.dismissTimerValue
-        if (dismissValue == 0L) return
-
-        dismissTime = System.currentTimeMillis() + dismissValue
-        scheduleDismiss()
-    }
-
     override fun onResume() {
         super.onResume()
         scheduleDismiss()
@@ -146,13 +141,14 @@ internal class BannerDialog private constructor() :
 
     private fun scheduleDismiss() {
         if (dismissTime > 0L) {
-            if (dismissTime - DISMISS_THRESHOLD < System.currentTimeMillis()) {
-                dismiss()
+            val timeToDismiss = dismissTime - System.currentTimeMillis()
+            if (timeToDismiss < DISMISS_THRESHOLD) {
+                dismissSafely()
             } else {
                 launch {
                     val timeout = dismissTime - System.currentTimeMillis()
                     delay(timeout)
-                    dismiss()
+                    dismissSafely()
                 }
             }
         }
@@ -162,8 +158,14 @@ internal class BannerDialog private constructor() :
         show(fragmentManager, null)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        job.cancel()
+    private fun dismissSafely() {
+        if (!isStateSaved) {
+            dismiss()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        job.cancelChildren()
     }
 }

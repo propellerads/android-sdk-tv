@@ -76,12 +76,16 @@ internal class BannerManager :
         scheduledImpressions.remove(requestUUID)?.cancel()
     }
 
+    @Synchronized
     private fun scheduleBannerImpression(
         requestUUID: UUID,
         bannerConfig: IBannerConfig,
         fm: WeakReference<FragmentManager>,
         isNewConfig: Boolean = false,
     ) {
+        // Check that Config is active for banner scheduled by BannerDismissListener
+        if (!activeConfigs.containsKey(requestUUID)) return
+
         val displaySettings = bannerConfig.impressionConfig
         val history = impressionHistory.get(bannerConfig.bannerId)
         val nextImpressionTime = calculateNextImpressionTime(displaySettings, history, isNewConfig)
