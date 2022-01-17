@@ -1,5 +1,6 @@
 package com.propellerads.sdk.repository
 
+import com.propellerads.sdk.bannerAd.ui.IBannerConfig
 import java.io.Serializable
 
 internal data class AdConfiguration(
@@ -30,7 +31,7 @@ internal data class WidgetAppearance(
 
 internal data class BannerConfig(
     val id: String,
-    val targetUrl: String,
+    val qrCodeBackendUrl: String,
     val appearance: BannerAppearance,
     val impressionConfig: ImpressionConfig,
 ) : Serializable
@@ -61,7 +62,23 @@ internal data class BannerAppearance(
 ) : Serializable
 
 internal enum class BannerGravity {
-    TOP, CENTER, BOTTOM
+    TOP,
+    CENTER,
+    BOTTOM,
+}
+
+internal data class QRCodeSettings(
+    val checkUrl: String,
+    val generateUrl: String,
+    val refreshUrl: String,
+) : Serializable
+
+internal data class QRBannerConfig(
+    val config: BannerConfig,
+    val qrCode: QRCodeSettings,
+) : IBannerConfig {
+    override val bannerId: String = config.id
+    override val impressionConfig = config.impressionConfig
 }
 
 internal object OK

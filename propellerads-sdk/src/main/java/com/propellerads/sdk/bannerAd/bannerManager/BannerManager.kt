@@ -1,17 +1,17 @@
-package com.propellerads.sdk.bannedAd.bannerManager
+package com.propellerads.sdk.bannerAd.bannerManager
 
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.propellerads.sdk.bannedAd.bannerManager.bannerDismissListener.BannerDismissListener
-import com.propellerads.sdk.bannedAd.bannerManager.impressionHistory.IImpressionHistory
-import com.propellerads.sdk.bannedAd.bannerManager.impressionHistory.ImpressionHistory
-import com.propellerads.sdk.bannedAd.bannerManager.impressionTimeCalculator.IImpressionTimeCalculator
-import com.propellerads.sdk.bannedAd.bannerManager.impressionTimeCalculator.ImpressionTimeCalculator
-import com.propellerads.sdk.bannedAd.ui.AdBannerDialog
-import com.propellerads.sdk.repository.BannerConfig
+import com.propellerads.sdk.bannerAd.bannerManager.bannerDismissListener.BannerDismissListener
+import com.propellerads.sdk.bannerAd.bannerManager.impressionHistory.IImpressionHistory
+import com.propellerads.sdk.bannerAd.bannerManager.impressionHistory.ImpressionHistory
+import com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator.IImpressionTimeCalculator
+import com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator.ImpressionTimeCalculator
+import com.propellerads.sdk.bannerAd.ui.BannerDialog
+import com.propellerads.sdk.bannerAd.ui.IBannerConfig
 import com.propellerads.sdk.repository.ImpressionConfig
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.*
@@ -32,7 +32,7 @@ internal class BannerManager :
         get() = job + Dispatchers.Main
 
     // used to avoid dispatching duplicated pairs <requestId, config>
-    private val activeConfigs = mutableMapOf<UUID, BannerConfig>()
+    private val activeConfigs = mutableMapOf<UUID, IBannerConfig>()
 
     // used to cancel scheduled impressions if the request is revoked
     private val scheduledImpressions = mutableMapOf<UUID, Job>()
@@ -53,47 +53,47 @@ internal class BannerManager :
     @Synchronized
     override fun dispatchConfig(
         requestUUID: UUID,
-        config: BannerConfig,
+        bannerConfig: IBannerConfig,
         fm: WeakReference<FragmentManager>
     ) {
         if (!activeConfigs.containsKey(requestUUID)) {
-            activeConfigs[requestUUID] = config
+            activeConfigs[requestUUID] = bannerConfig
             fm.get()?.run {
                 unregisterFragmentLifecycleCallbacks(bannerDismissListener)
                 registerFragmentLifecycleCallbacks(bannerDismissListener, false)
             }
-            scheduleBannerImpression(requestUUID, config, fm, isNewConfig = true)
+            scheduleBannerImpression(requestUUID, bannerConfig, fm, isNewConfig = true)
         } else {
-            Logger.d("Already dispatched. Config id: ${config.id}", TAG)
+            Logger.d("Already dispatched. Config id: ${bannerConfig.bannerId}", TAG)
         }
     }
 
     @Synchronized
     override fun revokeConfig(requestUUID: UUID) {
-        activeConfigs.remove(requestUUID)?.let {
-            Logger.d("Banner revoked. Config id: ${it.id}", TAG)
+        activeConfigs.remove(requestUUID)?.let { bannerConfig ->
+            Logger.d("Banner revoked. Config id: ${bannerConfig.bannerId}", TAG)
         }
         scheduledImpressions.remove(requestUUID)?.cancel()
     }
 
     private fun scheduleBannerImpression(
         requestUUID: UUID,
-        config: BannerConfig,
+        bannerConfig: IBannerConfig,
         fm: WeakReference<FragmentManager>,
         isNewConfig: Boolean = false,
     ) {
-        val displaySettings = config.impressionConfig
-        val history = impressionHistory.get(config.id)
+        val displaySettings = bannerConfig.impressionConfig
+        val history = impressionHistory.get(bannerConfig.bannerId)
         val nextImpressionTime = calculateNextImpressionTime(displaySettings, history, isNewConfig)
 
         val timeToNextImpression = nextImpressionTime - System.currentTimeMillis()
         if (timeToNextImpression < DISPLAY_NOW_THRESHOLD) {
-            displayBanner(requestUUID, config, fm)
+            displayBanner(requestUUID, bannerConfig, fm)
         } else {
-            Logger.d("Banner for config ${config.id} scheduled in ${timeToNextImpression / 1000.0} sec", TAG)
+            Logger.d("Banner for config ${bannerConfig.bannerId} scheduled in ${timeToNextImpression / 1000.0} sec", TAG)
             scheduledImpressions[requestUUID] = launch {
                 delay(timeToNextImpression)
-                displayBanner(requestUUID, config, fm)
+                displayBanner(requestUUID, bannerConfig, fm)
             }
         }
     }
@@ -115,22 +115,23 @@ internal class BannerManager :
 
     private fun displayBanner(
         requestUUID: UUID,
-        config: BannerConfig,
+        bannerConfig: IBannerConfig,
         fragmentManager: WeakReference<FragmentManager>,
     ) {
+        val bannerId = bannerConfig.bannerId
         val fm = fragmentManager.get()
         if (fm == null || fm.isStateSaved || fm.isDestroyed) {
-            Logger.d("FragmentManager is saved or destroyed; Config id: ${config.id}", TAG)
+            Logger.d("FragmentManager is saved or destroyed; Config id: $bannerId", TAG)
             return
         }
 
-        Logger.d("Banner for config ${config.id} displayed", TAG)
+        Logger.d("Banner for config $bannerId displayed", TAG)
 
-        AdBannerDialog
-            .build(requestUUID, config)
+        BannerDialog
+            .build(requestUUID, bannerConfig)
             .show(fm)
 
-        impressionHistory.add(config.id, System.currentTimeMillis())
+        impressionHistory.add(bannerId, System.currentTimeMillis())
     }
 
     override fun onStateChanged(

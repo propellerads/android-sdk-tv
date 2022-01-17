@@ -2,6 +2,9 @@ package com.propellerads.sdk.api
 
 import com.propellerads.sdk.api.dto.*
 import kotlinx.coroutines.delay
+import retrofit2.HttpException
+import java.io.IOException
+import kotlin.random.Random
 
 internal class MockApi : IApi {
 
@@ -12,6 +15,11 @@ internal class MockApi : IApi {
     ): SettingsRes {
 
         delay(1000)
+
+        val isRandomException = false
+        if (isRandomException && Random.nextBoolean()) {
+            throw IOException("Hello World Exception!")
+        }
 
         return SettingsRes(
             widgets = listOf(
@@ -61,7 +69,7 @@ internal class MockApi : IApi {
                     id = "test_banner_1",
                     zone = 140,
                     experimentBranchId = 220,
-                    targetUrl = "https://www.google.com",
+                    qrCodeBackendUrl = "https://propeller.backend/qrCodeBackendUrl",
                     settings = BannerSettingsRes(
                         layoutTemplate = "qr_code_3_1",
                         positionOnScreen = "bottom",
@@ -88,7 +96,7 @@ internal class MockApi : IApi {
                     id = "test_banner_2",
                     zone = 140,
                     experimentBranchId = 220,
-                    targetUrl = "https://www.yandex.com",
+                    qrCodeBackendUrl = "https://propeller.backend/qrCodeBackendUrl",
                     settings = BannerSettingsRes(
                         layoutTemplate = "qr_code_3_1",
                         positionOnScreen = "center",
@@ -116,9 +124,28 @@ internal class MockApi : IApi {
     }
 
     override suspend fun impressionCallback(url: String): OkRes {
-
         delay(1000)
 
+        val isRandomException = false
+        if (isRandomException && Random.nextBoolean()) {
+            throw IOException("Hello World Exception!")
+        }
+
         return OkRes
+    }
+
+    override suspend fun getQRCode(url: String): QRCodeSettingsRes {
+        delay(1000)
+
+        val isRandomException = false
+        if (isRandomException && Random.nextBoolean()) {
+            throw HttpException(null)
+        }
+
+        return QRCodeSettingsRes(
+            checkUrl = "https://propeller.backend/checkUrl",
+            generateUrl = "https://propeller.backend/generateUrl",
+            refreshUrl = "https://propeller.backend/refreshUrl",
+        )
     }
 }

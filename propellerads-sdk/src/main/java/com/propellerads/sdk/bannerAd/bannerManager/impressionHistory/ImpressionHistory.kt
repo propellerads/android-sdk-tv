@@ -1,4 +1,4 @@
-package com.propellerads.sdk.bannedAd.bannerManager.impressionHistory
+package com.propellerads.sdk.bannerAd.bannerManager.impressionHistory
 
 class ImpressionHistory : IImpressionHistory {
 

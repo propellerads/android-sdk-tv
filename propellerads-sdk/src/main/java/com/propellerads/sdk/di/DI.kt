@@ -7,10 +7,10 @@ import com.propellerads.sdk.api.ApiConfig
 import com.propellerads.sdk.api.ApiErrorParser
 import com.propellerads.sdk.api.IApi
 import com.propellerads.sdk.api.MockApi
-import com.propellerads.sdk.configurator.AdConfigurator
-import com.propellerads.sdk.configurator.IAdConfigurator
-import com.propellerads.sdk.bannedAd.bannerManager.BannerManager
-import com.propellerads.sdk.bannedAd.bannerManager.IBannerManager
+import com.propellerads.sdk.configurator.ConfigLoader
+import com.propellerads.sdk.configurator.IConfigLoader
+import com.propellerads.sdk.bannerAd.bannerManager.BannerManager
+import com.propellerads.sdk.bannerAd.bannerManager.IBannerManager
 import com.propellerads.sdk.provider.adId.AdIdProvider
 import com.propellerads.sdk.provider.adId.IAdIdProvider
 import com.propellerads.sdk.provider.deviceType.DeviceTypeProvider
@@ -50,10 +50,10 @@ internal object DI {
 
     private val repo: IPropellerRepository = PropellerRepository(api, errorParser)
 
-    private lateinit var _adConfigurator: AdConfigurator
+    private lateinit var _configLoader: ConfigLoader
 
-    val adConfigurator: IAdConfigurator
-        get() = _adConfigurator
+    val configLoader: IConfigLoader
+        get() = _configLoader
 
     val bannerManager: IBannerManager = BannerManager()
 
@@ -62,7 +62,7 @@ internal object DI {
         val publisherIdProvider: IPublisherIdProvider = PublisherIdProvider(context)
         val deviceTypeProvider: IDeviceTypeProvider = DeviceTypeProvider(context)
 
-        _adConfigurator = AdConfigurator(
+        _configLoader = ConfigLoader(
             repo,
             adIdProvider,
             publisherIdProvider,

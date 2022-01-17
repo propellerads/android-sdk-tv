@@ -4,9 +4,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.propellerads.sdk.configurator.AdConfigStatus
+import com.propellerads.sdk.bannerAd.ui.IBannerConfig
+import com.propellerads.sdk.configurator.BannerConfigStatus
 import com.propellerads.sdk.di.DI
-import com.propellerads.sdk.repository.BannerConfig
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -35,7 +35,7 @@ class PropellerBannerRequest(
     private val weakFM = WeakReference(fragmentManager)
 
     @Volatile
-    private var bannerConfig: BannerConfig? = null
+    private var bannerConfig: IBannerConfig? = null
 
     init {
         Logger.d("Created request with Config id: $adId", TAG)
@@ -52,31 +52,29 @@ class PropellerBannerRequest(
 
     private fun onLifecycleResume() {
         Logger.d("Resume request $requestUUID", TAG)
+
         bannerConfig?.let(::handleAdConfiguration)
             ?: obtainConfiguration()
     }
 
     private fun obtainConfiguration() {
         coroutineScope.launch {
-            DI.adConfigurator.status
+            DI.configLoader.bannersStatus
                 .collect(::handleConfigurationStatus)
         }
     }
 
-    private fun handleConfigurationStatus(status: AdConfigStatus) {
-        if (status is AdConfigStatus.Success) {
-            status.config.banners
-                .firstOrNull { it.id == adId }
-                ?.let { config ->
-                    bannerConfig = config
-                    handleAdConfiguration(config)
-                }
+    private fun handleConfigurationStatus(status: BannerConfigStatus) {
+        if (status is BannerConfigStatus.Success) {
+            bannerConfig = status.banners[adId]?.also {
+                handleAdConfiguration(it)
+            }
         }
     }
 
-    private fun handleAdConfiguration(config: BannerConfig) {
+    private fun handleAdConfiguration(bannerConfig: IBannerConfig) {
         Logger.d("Dispatch Banner config id: $adId", TAG)
-        DI.bannerManager.dispatchConfig(requestUUID, config, weakFM)
+        DI.bannerManager.dispatchConfig(requestUUID, bannerConfig, weakFM)
     }
 
     private fun onLifecycleStop() {

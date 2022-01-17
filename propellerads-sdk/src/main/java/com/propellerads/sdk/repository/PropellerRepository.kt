@@ -9,7 +9,7 @@ internal class PropellerRepository(
     private val errorParser: IErrorParser,
 ) : IPropellerRepository {
 
-    override fun getSettings(
+    override fun getConfiguration(
         publisherId: String,
         userId: String,
         deviceType: DeviceType
@@ -23,5 +23,9 @@ internal class PropellerRepository(
 
     override fun impressionCallback(url: String) = execute(errorParser) {
         api.impressionCallback(url)
+    }
+
+    override fun getQRCode(url: String) = execute(errorParser) {
+        api.getQRCode(url)
     }
 }

@@ -1,4 +1,4 @@
-package com.propellerads.sdk.bannedAd.ui
+package com.propellerads.sdk.bannerAd.ui
 
 import android.content.res.Resources
 import android.os.Bundle
@@ -11,26 +11,26 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.propellerads.sdk.databinding.PropellerBannerQrBinding
 import com.propellerads.sdk.repository.BannerAppearance
-import com.propellerads.sdk.repository.BannerConfig
 import com.propellerads.sdk.repository.BannerGravity
+import com.propellerads.sdk.repository.QRBannerConfig
 import com.propellerads.sdk.utils.Colors
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
-internal class AdBannerDialog private constructor() :
-    DialogFragment(), IAdBanner, CoroutineScope {
+internal class BannerDialog private constructor() :
+    DialogFragment(), IBanner, CoroutineScope {
 
     companion object {
         const val DISMISS_THRESHOLD = 500L
 
         fun build(
             requestUUID: UUID,
-            config: BannerConfig
-        ) = AdBannerDialog().apply {
+            config: IBannerConfig
+        ) = BannerDialog().apply {
             arguments = Bundle().apply {
-                putSerializable(IAdBanner.REQUEST_UUID, requestUUID)
-                putSerializable(IAdBanner.CONFIG, config)
+                putSerializable(IBannerConfig.REQUEST_UUID, requestUUID)
+                putSerializable(IBannerConfig.CONFIG, config)
             }
         }
     }
@@ -56,9 +56,27 @@ internal class AdBannerDialog private constructor() :
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
+    ): View? {
+        val bannerConfig = arguments?.getSerializable(IBannerConfig.CONFIG) as? IBannerConfig
+        if (bannerConfig == null) {
+            dismiss()
+            return null
+        }
+
+        return when (bannerConfig) {
+            is QRBannerConfig -> configureQRBanner(inflater, bannerConfig)
+            else -> {
+                dismiss()
+                null
+            }
+        }
+    }
+
+    private fun configureQRBanner(
+        inflater: LayoutInflater,
+        bannerConfig: QRBannerConfig,
     ): View {
-        val config = arguments?.getSerializable(IAdBanner.CONFIG) as? BannerConfig
-            ?: return View(context)
+        val config = bannerConfig.config
 
         configureDialogParams(config.appearance)
         configureAutoDismiss(config.appearance)
@@ -66,7 +84,7 @@ internal class AdBannerDialog private constructor() :
         val binding = when (config.appearance.layoutTemplate) {
             "qr_code_3_1" -> PropellerBannerQrBinding.inflate(inflater)
             else -> PropellerBannerQrBinding.inflate(inflater)    // todo: figure out what to do
-        }.apply { configure(config) }
+        }.apply { configure(bannerConfig) }
 
         return binding.root
     }

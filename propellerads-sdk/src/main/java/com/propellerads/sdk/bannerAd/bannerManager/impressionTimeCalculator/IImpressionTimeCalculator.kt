@@ -1,4 +1,4 @@
-package com.propellerads.sdk.bannedAd.bannerManager.impressionTimeCalculator
+package com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator
 
 interface IImpressionTimeCalculator {
 

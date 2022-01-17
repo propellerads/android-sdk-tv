@@ -2,6 +2,7 @@ package com.propellerads.sdk.api
 
 import com.propellerads.sdk.api.dto.DeviceTypeReq
 import com.propellerads.sdk.api.dto.OkRes
+import com.propellerads.sdk.api.dto.QRCodeSettingsRes
 import com.propellerads.sdk.api.dto.SettingsRes
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -19,4 +20,7 @@ internal interface IApi {
 
     @GET
     suspend fun impressionCallback(@Url url: String): OkRes
+
+    @GET
+    suspend fun getQRCode(@Url url: String): QRCodeSettingsRes
 }

@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.browser.customtabs.CustomTabsIntent
 import com.propellerads.sdk.R
-import com.propellerads.sdk.configurator.AdConfigStatus
+import com.propellerads.sdk.configurator.WidgetConfigStatus
 import com.propellerads.sdk.di.DI
 import com.propellerads.sdk.repository.WidgetConfig
 import com.propellerads.sdk.utils.*
@@ -36,7 +36,7 @@ class PropellerButton @JvmOverloads constructor(
             get() = job + Dispatchers.Main
     }
 
-    private val adConfigurator = DI.adConfigurator
+    private val adConfigurator = DI.configLoader
 
     private val button: AppCompatButton
     private val progress: ProgressBar
@@ -77,20 +77,20 @@ class PropellerButton @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         coroutineScope.launch {
-            adConfigurator.status
+            adConfigurator.widgetsStatus
                 .combine(widgetIdState, ::Pair)
                 .collect(::handleConfigurationStatus)
         }
     }
 
-    private fun handleConfigurationStatus(pair: Pair<AdConfigStatus, String>) {
+    private fun handleConfigurationStatus(pair: Pair<WidgetConfigStatus, String>) {
         val (status, widgetId) = pair
         when (status) {
-            is AdConfigStatus.Loading -> {
+            is WidgetConfigStatus.Loading -> {
                 setContent(hasProgress = true)
             }
-            is AdConfigStatus.Success -> {
-                val widgetConfig = status.config.widgets
+            is WidgetConfigStatus.Success -> {
+                val widgetConfig = status.widgets
                     .firstOrNull { it.id == widgetId }
                 if (widgetConfig != null) {
                     configureWidget(widgetConfig)
@@ -104,7 +104,7 @@ class PropellerButton @JvmOverloads constructor(
                     setContent(hasErrorView = true)
                 }
             }
-            is AdConfigStatus.Error -> {
+            is WidgetConfigStatus.Error -> {
                 errorView.text = status.exception?.message ?: "API exception"
                 setContent(hasErrorView = true)
             }

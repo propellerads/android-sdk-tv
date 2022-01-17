@@ -1,7 +1,7 @@
-package com.propellerads.sdk.bannedAd.bannerManager
+package com.propellerads.sdk.bannerAd.bannerManager
 
 import androidx.fragment.app.FragmentManager
-import com.propellerads.sdk.repository.BannerConfig
+import com.propellerads.sdk.bannerAd.ui.IBannerConfig
 import java.lang.ref.WeakReference
 import java.util.*
 
@@ -9,7 +9,7 @@ internal interface IBannerManager {
 
     fun dispatchConfig(
         requestUUID: UUID,
-        config: BannerConfig,
+        bannerConfig: IBannerConfig,
         fm: WeakReference<FragmentManager>,
     )
 

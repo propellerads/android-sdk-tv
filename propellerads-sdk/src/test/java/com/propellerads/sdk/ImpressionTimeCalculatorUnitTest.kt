@@ -1,6 +1,6 @@
 package com.propellerads.sdk
 
-import com.propellerads.sdk.bannedAd.bannerManager.impressionTimeCalculator.ImpressionTimeCalculator
+import com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator.ImpressionTimeCalculator
 import com.propellerads.sdk.utils.ILogger
 import io.mockk.every
 import io.mockk.mockk

@@ -62,13 +62,13 @@ internal data class BannerRes(
     val id: String,
     val zone: Long,
     val experimentBranchId: Long,
-    val targetUrl: String,  // qr code link
+    val qrCodeBackendUrl: String,
     val settings: BannerSettingsRes,
 ) : Mappable<BannerConfig> {
     override fun map() = settings.map().let { (appearance, impressionConfig) ->
         BannerConfig(
             id = id,
-            targetUrl = targetUrl,
+            qrCodeBackendUrl = qrCodeBackendUrl,
             appearance = appearance,
             impressionConfig = impressionConfig,
         )
@@ -132,12 +132,25 @@ internal data class BannerSettingsRes(
     }
 }
 
+internal data class QRCodeSettingsRes(
+    val checkUrl: String,
+    val generateUrl: String,
+    val refreshUrl: String,
+) : Mappable<QRCodeSettings> {
+    override fun map() = QRCodeSettings(
+        checkUrl = checkUrl,
+        generateUrl = generateUrl,
+        refreshUrl = refreshUrl,
+    )
+}
+
 internal object OkRes : Mappable<OK> {
     override fun map() = OK
 }
 
 internal enum class DeviceTypeReq {
-    TV, OTHER
+    TV,
+    OTHER,
 }
 
 internal fun DeviceType.toDeviceTypeReq(): DeviceTypeReq = when (this) {

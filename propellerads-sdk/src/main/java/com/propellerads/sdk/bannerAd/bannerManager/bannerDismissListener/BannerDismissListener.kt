@@ -1,16 +1,16 @@
-package com.propellerads.sdk.bannedAd.bannerManager.bannerDismissListener
+package com.propellerads.sdk.bannerAd.bannerManager.bannerDismissListener
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.propellerads.sdk.bannedAd.ui.IAdBanner
-import com.propellerads.sdk.repository.BannerConfig
+import com.propellerads.sdk.bannerAd.ui.IBanner
+import com.propellerads.sdk.bannerAd.ui.IBannerConfig
 import com.propellerads.sdk.utils.Logger
 import java.lang.ref.WeakReference
 import java.util.*
 
 internal class BannerDismissListener(
     val onBannerDismissed: (
-        UUID, BannerConfig, WeakReference<FragmentManager>
+        UUID, IBannerConfig, WeakReference<FragmentManager>
     ) -> Unit
 ) : FragmentManager.FragmentLifecycleCallbacks() {
 
@@ -19,15 +19,15 @@ internal class BannerDismissListener(
     }
 
     override fun onFragmentDetached(fm: FragmentManager, fragment: Fragment) {
-        if (fragment is IAdBanner) {
+        if (fragment is IBanner) {
 
             val config = fragment.arguments
-                ?.getSerializable(IAdBanner.CONFIG) as? BannerConfig
+                ?.getSerializable(IBannerConfig.CONFIG) as? IBannerConfig
 
             val requestUUID = fragment.arguments
-                ?.getSerializable(IAdBanner.REQUEST_UUID) as? UUID
+                ?.getSerializable(IBannerConfig.REQUEST_UUID) as? UUID
 
-            Logger.d("Banner with Config id: ${config?.id} dismissed", TAG)
+            Logger.d("Banner with Config id: ${config?.bannerId} dismissed", TAG)
 
             if (requestUUID != null && config != null) {
                 onBannerDismissed(requestUUID, config, WeakReference(fm))

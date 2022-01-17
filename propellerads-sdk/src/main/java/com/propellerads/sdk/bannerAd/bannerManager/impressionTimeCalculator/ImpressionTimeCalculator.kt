@@ -1,4 +1,4 @@
-package com.propellerads.sdk.bannedAd.bannerManager.impressionTimeCalculator
+package com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator
 
 import com.propellerads.sdk.utils.ILogger
 import kotlin.math.max
