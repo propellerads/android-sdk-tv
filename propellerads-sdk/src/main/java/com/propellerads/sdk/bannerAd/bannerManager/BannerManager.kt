@@ -5,7 +5,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.propellerads.sdk.bannerAd.bannerManager.bannerDismissListener.BannerDismissListener
 import com.propellerads.sdk.bannerAd.bannerManager.impressionHistory.IImpressionHistory
 import com.propellerads.sdk.bannerAd.bannerManager.impressionHistory.ImpressionHistory
 import com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator.IImpressionTimeCalculator
@@ -43,9 +42,6 @@ internal class BannerManager :
     // used to calculate the next impression time
     private val impressionTimeCalculator: IImpressionTimeCalculator = ImpressionTimeCalculator(Logger)
 
-    // used to schedule the nest impression after previous banner is dismissed
-    private val bannerDismissListener = BannerDismissListener(::scheduleBannerImpression)
-
     init {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
@@ -58,10 +54,6 @@ internal class BannerManager :
     ) {
         if (!activeConfigs.containsKey(requestUUID)) {
             activeConfigs[requestUUID] = bannerConfig
-            fm.get()?.run {
-                unregisterFragmentLifecycleCallbacks(bannerDismissListener)
-                registerFragmentLifecycleCallbacks(bannerDismissListener, false)
-            }
             scheduleBannerImpression(requestUUID, bannerConfig, fm, isNewConfig = true)
         } else {
             Logger.d("Already dispatched. Config id: ${bannerConfig.bannerId}", TAG)
@@ -70,21 +62,28 @@ internal class BannerManager :
 
     @Synchronized
     override fun revokeConfig(requestUUID: UUID) {
-        activeConfigs.remove(requestUUID)?.let { bannerConfig ->
-            Logger.d("Banner revoked. Config id: ${bannerConfig.bannerId}", TAG)
-        }
-        scheduledImpressions.remove(requestUUID)?.cancel()
+        activeConfigs
+            .remove(requestUUID)
+            ?.let { bannerConfig ->
+                Logger.d("Banner revoked. Config id: ${bannerConfig.bannerId}", TAG)
+            }
+
+        scheduledImpressions
+            .remove(requestUUID)
+            ?.cancel()
     }
 
-    @Synchronized
     private fun scheduleBannerImpression(
         requestUUID: UUID,
         bannerConfig: IBannerConfig,
         fm: WeakReference<FragmentManager>,
         isNewConfig: Boolean = false,
     ) {
-        // Check that Config is active for banner scheduled by BannerDismissListener
-        if (!activeConfigs.containsKey(requestUUID)) return
+        synchronized(this) {
+            // Check that Config is still active
+            // (for banners scheduled from displayBanner())
+            if (!activeConfigs.containsKey(requestUUID)) return
+        }
 
         val displaySettings = bannerConfig.impressionConfig
         val history = impressionHistory.get(bannerConfig.bannerId)
@@ -136,6 +135,8 @@ internal class BannerManager :
             .show(fm)
 
         impressionHistory.add(bannerId, System.currentTimeMillis())
+
+        scheduleBannerImpression(requestUUID, bannerConfig, fragmentManager, false)
     }
 
     override fun onStateChanged(
