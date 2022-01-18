@@ -1,5 +1,6 @@
 package com.propellerads.sdk.repository
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.collect
@@ -31,6 +32,23 @@ internal fun <T> Flow<T>.retryIfFailed(
                 } else {
                     emit(res)
                 }
+            } else {
+                emit(res)
+            }
+        }
+    } while (shallRetry)
+}
+
+internal fun <T> Flow<T>.retryUntilFail(
+    interval: Long,
+): Flow<T> = flow {
+    var shallRetry: Boolean
+    do {
+        shallRetry = false
+        collect { res ->
+            if (res is Resource.Success<*>) {
+                shallRetry = true
+                delay(interval)
             } else {
                 emit(res)
             }

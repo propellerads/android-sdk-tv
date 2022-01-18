@@ -28,4 +28,8 @@ internal class PropellerRepository(
     override fun getQRCode(url: String) = execute(errorParser) {
         api.getQRCode(url)
     }
+
+    override fun checkQRCode(url: String) = execute(errorParser) {
+        api.checkQRCode(url)
+    }
 }

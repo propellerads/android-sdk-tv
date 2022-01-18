@@ -23,4 +23,7 @@ internal interface IApi {
 
     @GET
     suspend fun getQRCode(@Url url: String): QRCodeSettingsRes
+
+    @GET
+    suspend fun checkQRCode(@Url url: String): OkRes
 }

@@ -9,12 +9,15 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.viewModels
 import com.propellerads.sdk.databinding.PropellerBannerQrBinding
 import com.propellerads.sdk.repository.BannerAppearance
 import com.propellerads.sdk.repository.BannerGravity
 import com.propellerads.sdk.repository.QRBannerConfig
 import com.propellerads.sdk.utils.Colors
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
@@ -22,8 +25,6 @@ internal class BannerDialog private constructor() :
     DialogFragment(), IBanner, CoroutineScope {
 
     companion object {
-        const val DISMISS_THRESHOLD = 500L
-
         fun build(
             requestUUID: UUID,
             config: IBannerConfig
@@ -43,7 +44,7 @@ internal class BannerDialog private constructor() :
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
 
-    private var dismissTime = 0L
+    private val viewModel: BannerDialogViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +60,7 @@ internal class BannerDialog private constructor() :
     ): View? {
         val bannerConfig = arguments?.getSerializable(IBannerConfig.CONFIG) as? IBannerConfig
         if (bannerConfig == null) {
-            dismissSafely().also { dismissSafely() }
+            dismissSafely()
             return null
         }
 
@@ -73,9 +74,9 @@ internal class BannerDialog private constructor() :
         inflater: LayoutInflater,
         bannerConfig: QRBannerConfig,
     ): View {
-        val config = bannerConfig.config
+        viewModel.setBannerConfig(bannerConfig)
 
-        calculateAutoDismissTime(config.appearance)
+        val config = bannerConfig.config
         configureDialogParams(config.appearance)
 
         val binding = when (config.appearance.layoutTemplate) {
@@ -84,12 +85,6 @@ internal class BannerDialog private constructor() :
         }.apply { configure(bannerConfig) }
 
         return binding.root
-    }
-
-    private fun calculateAutoDismissTime(appearance: BannerAppearance) {
-        val dismissValue = appearance.dismissTimerValue
-        if (dismissValue == 0L) return
-        dismissTime = System.currentTimeMillis() + dismissValue
     }
 
     private fun configureDialogParams(appearance: BannerAppearance) {
@@ -136,21 +131,16 @@ internal class BannerDialog private constructor() :
 
     override fun onResume() {
         super.onResume()
-        scheduleDismiss()
+        subscribeOnDismiss()
     }
 
-    private fun scheduleDismiss() {
-        if (dismissTime > 0L) {
-            val timeToDismiss = dismissTime - System.currentTimeMillis()
-            if (timeToDismiss < DISMISS_THRESHOLD) {
-                dismissSafely()
-            } else {
-                launch {
-                    val timeout = dismissTime - System.currentTimeMillis()
-                    delay(timeout)
+    private fun subscribeOnDismiss() {
+        launch {
+            viewModel.dismissFlow
+                .filter { it }
+                .collect {
                     dismissSafely()
                 }
-            }
         }
     }
 

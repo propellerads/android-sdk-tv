@@ -71,6 +71,8 @@ internal data class QRCodeSettings(
     val checkUrl: String,
     val generateUrl: String,
     val refreshUrl: String,
+    val expire: Long,
+    val checkInterval: Long,
 ) : Serializable
 
 internal data class QRBannerConfig(

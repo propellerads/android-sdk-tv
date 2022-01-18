@@ -136,11 +136,15 @@ internal data class QRCodeSettingsRes(
     val checkUrl: String,
     val generateUrl: String,
     val refreshUrl: String,
+    val expire: Long,
+    val checkInterval: Long,
 ) : Mappable<QRCodeSettings> {
     override fun map() = QRCodeSettings(
         checkUrl = checkUrl,
         generateUrl = generateUrl,
         refreshUrl = refreshUrl,
+        expire = expire,
+        checkInterval = checkInterval,
     )
 }
 

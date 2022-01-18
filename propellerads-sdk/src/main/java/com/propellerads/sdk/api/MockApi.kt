@@ -2,7 +2,9 @@ package com.propellerads.sdk.api
 
 import com.propellerads.sdk.api.dto.*
 import kotlinx.coroutines.delay
+import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.HttpException
+import retrofit2.Response
 import java.io.IOException
 import kotlin.random.Random
 
@@ -84,12 +86,12 @@ internal class MockApi : IApi {
                         extraDescriptionColor = "#4D000000",
                         backgroundColor = "#FFFFFF",
                         qrCodeColor = "#789F32",
-                        dismissTimerValue = 5_000,
+                        dismissTimerValue = 10_000,
                         dismissTimerVisibility = false,
-                        interval = 10_000,
+                        interval = 20_000,
                         timeout = 5_000,
                         frequency = 3,
-                        capping = 50_000,
+                        capping = 60_000,
                     )
                 ),
                 BannerRes(
@@ -139,13 +141,31 @@ internal class MockApi : IApi {
 
         val isRandomException = false
         if (isRandomException && Random.nextBoolean()) {
-            throw HttpException(null)
+            throw HttpException(
+                Response.error<OkRes>(500, "{}".toResponseBody())
+            )
         }
 
         return QRCodeSettingsRes(
             checkUrl = "https://propeller.backend/checkUrl",
             generateUrl = "https://propeller.backend/generateUrl",
             refreshUrl = "https://propeller.backend/refreshUrl",
+            expire = 2 * 60 * 1000,
+            checkInterval = 1000,
         )
+    }
+
+    var mockCounter = Random.nextInt(7, 10)
+
+    override suspend fun checkQRCode(url: String): OkRes {
+        return if (mockCounter == 0) {
+            mockCounter = Random.nextInt(8, 13)
+            throw HttpException(
+                Response.error<OkRes>(404, "{}".toResponseBody())
+            )
+        } else {
+            mockCounter--
+            OkRes
+        }
     }
 }

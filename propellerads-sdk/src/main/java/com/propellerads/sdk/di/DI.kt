@@ -48,7 +48,7 @@ internal object DI {
 
     private val errorParser: IErrorParser = ApiErrorParser()
 
-    private val repo: IPropellerRepository = PropellerRepository(api, errorParser)
+    val repo: IPropellerRepository = PropellerRepository(api, errorParser)
 
     private lateinit var _configLoader: ConfigLoader
 
