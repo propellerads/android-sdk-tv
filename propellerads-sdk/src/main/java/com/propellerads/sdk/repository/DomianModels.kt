@@ -56,7 +56,6 @@ internal data class BannerAppearance(
     val descriptionColor: String,
     val extraDescriptionColor: String,
     val backgroundColor: String,
-    val qrCodeColor: String,
     val dismissTimerValue: Long,
     val dismissTimerVisibility: Boolean,
 ) : Serializable

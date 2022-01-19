@@ -5,8 +5,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.propellerads.sdk.bannerAd.ui.IBannerConfig
-import com.propellerads.sdk.configuration.BannerConfigStatus
 import com.propellerads.sdk.di.DI
+import com.propellerads.sdk.repository.Resource
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -63,13 +63,13 @@ class PropellerBannerRequest(
     private fun obtainConfiguration() {
         coroutineScope.launch {
             configLoader.bannersStatus
-                .collect(::handleConfigurationStatus)
+                .collect(::handleConfigurationRes)
         }
     }
 
-    private fun handleConfigurationStatus(status: BannerConfigStatus) {
-        if (status is BannerConfigStatus.Success) {
-            bannerConfig = status.banners[adId]?.also {
+    private fun handleConfigurationRes(resource: Resource<Map<String, IBannerConfig>>) {
+        if (resource is Resource.Success) {
+            bannerConfig = resource.data[adId]?.also {
                 handleAdConfiguration(it)
             }
         }

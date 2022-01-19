@@ -27,19 +27,19 @@ internal class ConfigLoader(
     private companion object {
         const val REQUEST_TIMEOUT_MS_MIN = 1_000L
         const val REQUEST_TIMEOUT_MS_MAX = 15_000L
-        const val QR_RETRY_MAX_ATTEMPT = 3
+        const val QR_RETRY_MAX_ATTEMPT = 3L
     }
 
-    private val _widgetsStatus = MutableStateFlow<WidgetConfigStatus>(WidgetConfigStatus.Loading)
-    override val widgetsStatus: Flow<WidgetConfigStatus>
+    private val _widgetsStatus = MutableStateFlow<Resource<Map<String, WidgetConfig>>>(Resource.Loading)
+    override val widgetsStatus: Flow<Resource<Map<String, WidgetConfig>>>
         get() = _widgetsStatus
 
-    private val _bannersStatus = MutableStateFlow<BannerConfigStatus>(BannerConfigStatus.Loading)
-    override val bannersStatus: Flow<BannerConfigStatus>
+    private val _bannersStatus = MutableStateFlow<Resource<Map<String, IBannerConfig>>>(Resource.Loading)
+    override val bannersStatus: Flow<Resource<Map<String, IBannerConfig>>>
         get() = _bannersStatus
 
-    private val _qrCodesStatus = MutableStateFlow<Map<String, QRCodeStatus>>(emptyMap())
-    override val qrCodesStatus: Flow<Map<String, QRCodeStatus>>
+    private val _qrCodesStatus = MutableStateFlow<Map<String, Resource<QRCode>>>(emptyMap())
+    override val qrCodesStatus: Flow<Map<String, Resource<QRCode>>>
         get() = _qrCodesStatus
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO
@@ -56,19 +56,19 @@ internal class ConfigLoader(
         if (publisherId == null) {
             Logger.d(NoPublisherIdException.message!!)
             launch {
-                _widgetsStatus.emit(WidgetConfigStatus.Error(NoPublisherIdException))
+                _widgetsStatus.emit(Resource.Fail(NoPublisherIdException))
             }
             return
         }
         launch {
             repository.getConfiguration(publisherId, userId, deviceType)
                 .doOnLoading {
-                    _widgetsStatus.emit(WidgetConfigStatus.Loading)
+                    _widgetsStatus.emit(Resource.Loading)
                 }
                 .retryIfFailed { resource, attempt ->
                     Logger.d("Get Config exception: ${resource.message}")
-                    _widgetsStatus.emit(WidgetConfigStatus.Error(AdSettingsRequestException))
-                    _bannersStatus.emit(BannerConfigStatus.Error(AdSettingsRequestException))
+                    _widgetsStatus.emit(Resource.Fail(AdSettingsRequestException))
+                    _bannersStatus.emit(Resource.Fail(AdSettingsRequestException))
                     (resource.exception is IOException).also {
                         val delayMs = getBackoffDelay(attempt)
                         Logger.d("Try again in: $delayMs")
@@ -81,8 +81,10 @@ internal class ConfigLoader(
 
     private suspend fun handleConfigurationRes(resource: Resource<AdConfiguration>) {
         resource.dataOrNull()?.let { data ->
-            _widgetsStatus.emit(WidgetConfigStatus.Success(data.widgets))
-            _bannersStatus.emit(BannerConfigStatus.Success(
+            _widgetsStatus.emit(Resource.Success(
+                data.widgets.associateBy { it.id }
+            ))
+            _bannersStatus.emit(Resource.Success(
                 data.banners.associateBy { it.id }
             ))
         }
@@ -92,20 +94,21 @@ internal class ConfigLoader(
         if (banner !is BannerConfig) return
         launch {
             repository.getQRCode(banner.qrCodeRequestUrl)
-                .onEach { res ->
-                    updateQRCodeStatus(banner.id, QRCodeStatus.fromResource(res))
-                }
+                .onEach { updateQRCodeStatus(banner.id, it) }
                 .filter { it !is Resource.Loading }
                 .retryIfFailed { res, attempt ->
-                    (attempt < QR_RETRY_MAX_ATTEMPT).also {
-                        val delayMs = getBackoffDelay(attempt)
-                        Logger.d("Get QR exception: ${res.message}; Try again in: $delayMs")
-                        delay(delayMs)
-                    }
+                    handleRetry(res, attempt, QR_RETRY_MAX_ATTEMPT, "Get QR exception")
                 }
                 .collect()
         }
     }
+
+    override fun getQrCodeBytes(qrCode: QRCode) =
+        repository.getQrCodeBytes(qrCode.generateUrl)
+            .filter { it !is Resource.Loading }
+            .retryIfFailed { res, attempt ->
+                handleRetry(res, attempt, QR_RETRY_MAX_ATTEMPT, "Get QR Image exception")
+            }
 
     override fun checkQrCode(bannerId: String, qrCode: QRCode): Flow<Boolean> =
         repository.checkQRCode(qrCode.checkUrl)
@@ -113,12 +116,12 @@ internal class ConfigLoader(
             .filter { it is Resource.Fail }
             .onEach {
                 // drop used QR code status
-                updateQRCodeStatus(bannerId, QRCodeStatus.Loading)
+                updateQRCodeStatus(bannerId, Resource.Loading)
             }
             .map { true }
 
     private val updateStatusMutex = Mutex()
-    private suspend fun updateQRCodeStatus(bannerId: String, status: QRCodeStatus) {
+    private suspend fun updateQRCodeStatus(bannerId: String, status: Resource<QRCode>) {
         updateStatusMutex.withLock {
             val statusMap = _qrCodesStatus.value.toMutableMap()
                 .apply { this[bannerId] = status }
@@ -130,16 +133,21 @@ internal class ConfigLoader(
         launch {
             Logger.d("Invoke impression callback: $url")
             repository.impressionCallback(url)
-                .retryIfFailed { resource, attempt ->
-                    true.also {
-                        val delayMs = getBackoffDelay(attempt)
-                        Logger.d("Post Impression exception: ${resource.message}; Try again in: $delayMs")
-                        delay(delayMs)
-                    }
+                .retryIfFailed { res, attempt ->
+                    handleRetry(res, attempt, Long.MAX_VALUE, "Post Impression exception")
                 }
                 .collect()
         }
     }
+
+    private suspend fun handleRetry(res: Resource.Fail, attempt: Long, maxAttempt: Long, logMsg: String) =
+        (attempt < maxAttempt).also {
+            if (it) {
+                val delayMs = getBackoffDelay(attempt)
+                Logger.d("$logMsg: ${res.message}; Try again in: $delayMs")
+                delay(delayMs)
+            }
+        }
 
     private fun getBackoffDelay(attempt: Long) =
         min((attempt + 1) * REQUEST_TIMEOUT_MS_MIN, REQUEST_TIMEOUT_MS_MAX)

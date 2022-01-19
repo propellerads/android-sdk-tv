@@ -43,8 +43,8 @@ internal object DI {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-//    private val api: IApi = retrofit.create(IApi::class.java)
-    private val api: IApi = MockApi()
+    private val api: IApi = retrofit.create(IApi::class.java)
+//    private val api: IApi = MockApi()
 
     private val errorParser: IErrorParser = ApiErrorParser()
 

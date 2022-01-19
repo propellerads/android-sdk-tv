@@ -62,8 +62,6 @@ internal data class WidgetSettingsRes(
 
 internal data class BannerRes(
     val id: String,
-    val zone: Long,
-    val experimentBranchId: Long,
     val qrCodeBackendUrl: String,
     val settings: BannerSettingsRes,
 ) : Mappable<BannerConfig> {
@@ -90,7 +88,6 @@ internal data class BannerSettingsRes(
     val descriptionColor: String,
     val extraDescriptionColor: String,
     val backgroundColor: String,
-    val qrCodeColor: String,
     val dismissTimerValue: Long,
     val dismissTimerVisibility: Boolean,
     val interval: Int,
@@ -119,7 +116,6 @@ internal data class BannerSettingsRes(
             descriptionColor = descriptionColor,
             extraDescriptionColor = extraDescriptionColor,
             backgroundColor = backgroundColor,
-            qrCodeColor = qrCodeColor,
             dismissTimerValue = dismissTimerValue * MILLISECONDS,
             dismissTimerVisibility = dismissTimerVisibility,
         )

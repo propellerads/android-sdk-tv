@@ -47,3 +47,20 @@ internal fun <T : Mappable<D>, D> execute(
             )
         )
     }
+
+internal fun <T, D> executeRaw(
+    mapper: (T) -> D,
+    request: suspend () -> T
+): Flow<Resource<D>> = flow {
+    emit(Resource.Loading)
+    emit(
+        Resource.Success(
+            mapper(
+                request()
+            )
+        )
+    )
+}
+    .catch { e ->
+        emit(Resource.Fail(e))
+    }

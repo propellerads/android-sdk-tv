@@ -13,8 +13,8 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.browser.customtabs.CustomTabsIntent
 import com.propellerads.sdk.R
-import com.propellerads.sdk.configuration.WidgetConfigStatus
 import com.propellerads.sdk.di.DI
+import com.propellerads.sdk.repository.Resource
 import com.propellerads.sdk.repository.WidgetConfig
 import com.propellerads.sdk.utils.*
 import kotlinx.coroutines.*
@@ -79,19 +79,20 @@ class PropellerButton @JvmOverloads constructor(
         coroutineScope.launch {
             adConfigurator.widgetsStatus
                 .combine(widgetIdState, ::Pair)
-                .collect(::handleConfigurationStatus)
+                .collect(::handleConfigurationRes)
         }
     }
 
-    private fun handleConfigurationStatus(pair: Pair<WidgetConfigStatus, String>) {
-        val (status, widgetId) = pair
-        when (status) {
-            is WidgetConfigStatus.Loading -> {
+    private fun handleConfigurationRes(
+        pair: Pair<Resource<Map<String, WidgetConfig>>, String>
+    ) {
+        val (resource, widgetId) = pair
+        when (resource) {
+            is Resource.Loading -> {
                 setContent(hasProgress = true)
             }
-            is WidgetConfigStatus.Success -> {
-                val widgetConfig = status.widgets
-                    .firstOrNull { it.id == widgetId }
+            is Resource.Success -> {
+                val widgetConfig = resource.data[widgetId]
                 if (widgetConfig != null) {
                     configureWidget(widgetConfig)
                     setContent(hasButton = true)
@@ -104,8 +105,8 @@ class PropellerButton @JvmOverloads constructor(
                     setContent(hasErrorView = true)
                 }
             }
-            is WidgetConfigStatus.Error -> {
-                errorView.text = status.exception?.message ?: "API exception"
+            is Resource.Fail -> {
+                errorView.text = resource.exception?.message ?: "API exception"
                 setContent(hasErrorView = true)
             }
         }

@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         PropellerBannerRequest(
-            "test_banner_1",
+            "qr_code",
             lifecycle,
             supportFragmentManager
         )

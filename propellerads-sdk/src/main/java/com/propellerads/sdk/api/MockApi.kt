@@ -3,6 +3,7 @@ package com.propellerads.sdk.api
 import com.propellerads.sdk.api.dto.*
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.delay
+import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.HttpException
 import retrofit2.Response
@@ -70,8 +71,6 @@ internal class MockApi : IApi {
             banners = listOf(
                 BannerRes(
                     id = "test_banner_1",
-                    zone = 140,
-                    experimentBranchId = 220,
                     qrCodeBackendUrl = "https://propeller.backend/qrCodeBackendUrl",
                     settings = BannerSettingsRes(
                         layoutTemplate = "qr_code_3_1",
@@ -86,7 +85,6 @@ internal class MockApi : IApi {
                         descriptionColor = "#000000",
                         extraDescriptionColor = "#4D000000",
                         backgroundColor = "#FFFFFF",
-                        qrCodeColor = "#789F32",
                         dismissTimerValue = 10,
                         dismissTimerVisibility = false,
                         interval = 20,
@@ -97,8 +95,6 @@ internal class MockApi : IApi {
                 ),
                 BannerRes(
                     id = "test_banner_2",
-                    zone = 140,
-                    experimentBranchId = 220,
                     qrCodeBackendUrl = "https://propeller.backend/qrCodeBackendUrl",
                     settings = BannerSettingsRes(
                         layoutTemplate = "qr_code_3_1",
@@ -113,7 +109,6 @@ internal class MockApi : IApi {
                         descriptionColor = "#6b6246",
                         extraDescriptionColor = "#6e6a5f",
                         backgroundColor = "#edd282",
-                        qrCodeColor = "#332601",
                         dismissTimerValue = 5,
                         dismissTimerVisibility = false,
                         interval = 10,
@@ -170,5 +165,9 @@ internal class MockApi : IApi {
             Logger.d("Attempt to QR read: $mockCounter", "Banner")
             OkRes
         }
+    }
+
+    override suspend fun getQRCodeBitmap(url: String): ResponseBody {
+        return "".toResponseBody()
     }
 }

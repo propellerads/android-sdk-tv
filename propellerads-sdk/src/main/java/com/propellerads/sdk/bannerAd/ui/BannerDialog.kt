@@ -79,7 +79,8 @@ internal class BannerDialog private constructor() :
                 .apply {
                     applyStyle(bannerConfig)
                     launch {
-                        // todo: get QR code image
+                        viewModel.qrCodeImageFlow
+                            .collect(this@apply::setQRImage)
                     }
                 }
             else -> PropellerBannerQrBinding.inflate(inflater)    // todo: figure out what to do

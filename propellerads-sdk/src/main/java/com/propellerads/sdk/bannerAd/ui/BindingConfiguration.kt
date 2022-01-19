@@ -1,7 +1,8 @@
 package com.propellerads.sdk.bannerAd.ui
 
-import com.propellerads.sdk.R
+import android.graphics.BitmapFactory
 import com.propellerads.sdk.databinding.PropellerBannerQrBinding
+import com.propellerads.sdk.repository.Resource
 import com.propellerads.sdk.utils.Colors
 
 internal fun PropellerBannerQrBinding.applyStyle(bannerConfig: IBannerConfig) {
@@ -13,6 +14,20 @@ internal fun PropellerBannerQrBinding.applyStyle(bannerConfig: IBannerConfig) {
     extraDescription.text = appearance.extraDescriptionLabel
     extraDescription.setTextColor(Colors.from(appearance.extraDescriptionColor))
     root.setBackgroundColor(Colors.from(appearance.backgroundColor))
-    // todo: display qr from link
-    qrCode.setImageResource(R.drawable.mock_qr)
+}
+
+internal fun PropellerBannerQrBinding.setQRImage(resource: Resource<ByteArray>) {
+    when (resource) {
+        is Resource.Loading -> {
+            //todo
+        }
+        is Resource.Fail -> {
+            // todo
+        }
+        is Resource.Success -> {
+            val bytes = resource.data
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            qrCode.setImageBitmap(bitmap)
+        }
+    }
 }
