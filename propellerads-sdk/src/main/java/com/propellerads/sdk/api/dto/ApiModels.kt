@@ -4,6 +4,8 @@ import com.propellerads.sdk.provider.deviceType.DeviceType
 import com.propellerads.sdk.repository.*
 import java.util.*
 
+internal const val MILLISECONDS = 1000L
+
 internal data class SettingsRes(
     val widgets: List<WidgetRes>?,
     val banners: List<BannerRes>?,
@@ -118,15 +120,15 @@ internal data class BannerSettingsRes(
             extraDescriptionColor = extraDescriptionColor,
             backgroundColor = backgroundColor,
             qrCodeColor = qrCodeColor,
-            dismissTimerValue = dismissTimerValue,
+            dismissTimerValue = dismissTimerValue * MILLISECONDS,
             dismissTimerVisibility = dismissTimerVisibility,
         )
 
         val impression = ImpressionConfig(
-            interval = interval,
-            timeout = timeout,
+            interval = interval * MILLISECONDS,
+            timeout = timeout * MILLISECONDS,
             frequency = frequency,
-            capping = capping,
+            capping = capping * MILLISECONDS,
         )
         return appearance to impression
     }
@@ -136,15 +138,17 @@ internal data class QRCodeSettingsRes(
     val checkUrl: String,
     val generateUrl: String,
     val refreshUrl: String,
-    val expire: Long,
-    val checkInterval: Long,
+    val codeTtl: Int,
+    val linksExpiredAt: Long,
+    val checkUrlInterval: Long,
 ) : Mappable<QRCode> {
     override fun map() = QRCode(
         checkUrl = checkUrl,
         generateUrl = generateUrl,
         refreshUrl = refreshUrl,
-        expire = expire,
-        checkInterval = checkInterval,
+        qrCodeTtl = codeTtl * MILLISECONDS,
+        linksExpiredAt = linksExpiredAt * MILLISECONDS,
+        checkInterval = checkUrlInterval * MILLISECONDS,
     )
 }
 

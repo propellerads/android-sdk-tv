@@ -37,10 +37,10 @@ internal data class BannerConfig(
 ) : IBannerConfig
 
 internal data class ImpressionConfig(
-    val interval: Int, // time between ad impressions (ms)
-    val timeout: Int,  // the first ad impression timeout (ms)
+    val interval: Long, // time between ad impressions (ms)
+    val timeout: Long,  // the first ad impression timeout (ms)
     val frequency: Int, // max ad impression frequency during time capping
-    val capping: Int,   // time interval for frequency measurement (ms)
+    val capping: Long,   // time interval for frequency measurement (ms)
 ) : Serializable
 
 internal data class BannerAppearance(
@@ -70,8 +70,9 @@ internal enum class BannerGravity {
 internal data class QRCode(
     val checkUrl: String,
     val generateUrl: String,
-    val refreshUrl: String,  // not used in POC
-    val expire: Long,        // not used in POC
+    val refreshUrl: String,     // not used in POC
+    val qrCodeTtl: Long,        // not used in POC
+    val linksExpiredAt: Long,   // not used in POC
     val checkInterval: Long,
 ) : Serializable
 

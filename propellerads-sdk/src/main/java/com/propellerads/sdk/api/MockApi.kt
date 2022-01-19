@@ -1,6 +1,7 @@
 package com.propellerads.sdk.api
 
 import com.propellerads.sdk.api.dto.*
+import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.delay
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.HttpException
@@ -86,12 +87,12 @@ internal class MockApi : IApi {
                         extraDescriptionColor = "#4D000000",
                         backgroundColor = "#FFFFFF",
                         qrCodeColor = "#789F32",
-                        dismissTimerValue = 10_000,
+                        dismissTimerValue = 10,
                         dismissTimerVisibility = false,
-                        interval = 20_000,
-                        timeout = 5_000,
+                        interval = 20,
+                        timeout = 5,
                         frequency = 3,
-                        capping = 60_000,
+                        capping = 60,
                     )
                 ),
                 BannerRes(
@@ -113,12 +114,12 @@ internal class MockApi : IApi {
                         extraDescriptionColor = "#6e6a5f",
                         backgroundColor = "#edd282",
                         qrCodeColor = "#332601",
-                        dismissTimerValue = 5_000,
+                        dismissTimerValue = 5,
                         dismissTimerVisibility = false,
-                        interval = 10_000,
-                        timeout = 5_000,
+                        interval = 10,
+                        timeout = 5,
                         frequency = 3,
-                        capping = 50_000,
+                        capping = 50,
                     )
                 )
             )
@@ -150,12 +151,13 @@ internal class MockApi : IApi {
             checkUrl = "https://propeller.backend/checkUrl",
             generateUrl = "https://propeller.backend/generateUrl",
             refreshUrl = "https://propeller.backend/refreshUrl",
-            expire = 2 * 60 * 1000,
-            checkInterval = 1000,
+            codeTtl = 60,
+            linksExpiredAt = System.currentTimeMillis() / 1000 + 3 * 60 * 60,
+            checkUrlInterval = 1,
         )
     }
 
-    var mockCounter = Random.nextInt(7, 10)
+    var mockCounter = Random.nextInt(7, 13)
 
     override suspend fun checkQRCode(url: String): OkRes {
         return if (mockCounter == 0) {
@@ -165,6 +167,7 @@ internal class MockApi : IApi {
             )
         } else {
             mockCounter--
+            Logger.d("Attempt to QR read: $mockCounter", "Banner")
             OkRes
         }
     }

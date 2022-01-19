@@ -12,10 +12,10 @@ internal class ImpressionTimeCalculator(
     }
 
     override fun calculateNextImpressionTime(
-        interval: Int,
-        timeout: Int,
+        interval: Long,
+        timeout: Long,
         maxFrequency: Int,
-        capping: Int,
+        capping: Long,
         history: List<Long>,
         addForcedTimeout: Boolean,
         currentTime: Long,
@@ -35,7 +35,7 @@ internal class ImpressionTimeCalculator(
         val nextImpressionTime = max(lastWithInterval, minNextImpressionTime)
 
         // if capping or frequency parameters are not presented then return nextImpressionTime
-        if (maxFrequency == 0 || capping == 0) {
+        if (maxFrequency == 0 || capping == 0L) {
             logger.d("No frequency rules. Schedule the next with the regular interval", TAG)
             return nextImpressionTime
         }

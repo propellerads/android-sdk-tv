@@ -3,10 +3,10 @@ package com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator
 interface IImpressionTimeCalculator {
 
     fun calculateNextImpressionTime(
-        interval: Int,
-        timeout: Int,
+        interval: Long,
+        timeout: Long,
         maxFrequency: Int,
-        capping: Int,
+        capping: Long,
         history: List<Long>,
         addForcedTimeout: Boolean,
         currentTime: Long,
