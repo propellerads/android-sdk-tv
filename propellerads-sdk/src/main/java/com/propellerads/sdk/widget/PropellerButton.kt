@@ -13,7 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.browser.customtabs.CustomTabsIntent
 import com.propellerads.sdk.R
-import com.propellerads.sdk.configurator.WidgetConfigStatus
+import com.propellerads.sdk.configuration.WidgetConfigStatus
 import com.propellerads.sdk.di.DI
 import com.propellerads.sdk.repository.WidgetConfig
 import com.propellerads.sdk.utils.*

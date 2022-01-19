@@ -68,7 +68,7 @@ internal data class BannerRes(
     override fun map() = settings.map().let { (appearance, impressionConfig) ->
         BannerConfig(
             id = id,
-            qrCodeBackendUrl = qrCodeBackendUrl,
+            qrCodeRequestUrl = qrCodeBackendUrl,
             appearance = appearance,
             impressionConfig = impressionConfig,
         )
@@ -138,8 +138,8 @@ internal data class QRCodeSettingsRes(
     val refreshUrl: String,
     val expire: Long,
     val checkInterval: Long,
-) : Mappable<QRCodeSettings> {
-    override fun map() = QRCodeSettings(
+) : Mappable<QRCode> {
+    override fun map() = QRCode(
         checkUrl = checkUrl,
         generateUrl = generateUrl,
         refreshUrl = refreshUrl,

@@ -13,7 +13,7 @@ internal interface IPropellerRepository {
 
     fun impressionCallback(url: String): Flow<Resource<OK>>
 
-    fun getQRCode(url: String): Flow<Resource<QRCodeSettings>>
+    fun getQRCode(url: String): Flow<Resource<QRCode>>
 
     fun checkQRCode(url: String): Flow<Resource<OK>>
 }

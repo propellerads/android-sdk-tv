@@ -13,7 +13,6 @@ import androidx.fragment.app.viewModels
 import com.propellerads.sdk.databinding.PropellerBannerQrBinding
 import com.propellerads.sdk.repository.BannerAppearance
 import com.propellerads.sdk.repository.BannerGravity
-import com.propellerads.sdk.repository.QRBannerConfig
 import com.propellerads.sdk.utils.Colors
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -64,25 +63,27 @@ internal class BannerDialog private constructor() :
             return null
         }
 
-        return when (bannerConfig) {
-            is QRBannerConfig -> configureQRBanner(inflater, bannerConfig)
-            else -> null.also { dismissSafely() }
-        }
+        return configureBanner(inflater, bannerConfig)
     }
 
-    private fun configureQRBanner(
+    private fun configureBanner(
         inflater: LayoutInflater,
-        bannerConfig: QRBannerConfig,
+        bannerConfig: IBannerConfig,
     ): View {
         viewModel.setBannerConfig(bannerConfig)
 
-        val config = bannerConfig.config
-        configureDialogParams(config.appearance)
+        configureDialogParams(bannerConfig.appearance)
 
-        val binding = when (config.appearance.layoutTemplate) {
+        val binding = when (bannerConfig.appearance.layoutTemplate) {
             "qr_code_3_1" -> PropellerBannerQrBinding.inflate(inflater)
+                .apply {
+                    applyStyle(bannerConfig)
+                    launch {
+                        // todo: get QR code image
+                    }
+                }
             else -> PropellerBannerQrBinding.inflate(inflater)    // todo: figure out what to do
-        }.apply { configure(bannerConfig) }
+        }
 
         return binding.root
     }

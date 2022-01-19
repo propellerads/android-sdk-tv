@@ -30,11 +30,11 @@ internal data class WidgetAppearance(
 )
 
 internal data class BannerConfig(
-    val id: String,
-    val qrCodeBackendUrl: String,
-    val appearance: BannerAppearance,
-    val impressionConfig: ImpressionConfig,
-) : Serializable
+    override val id: String,
+    override val qrCodeRequestUrl: String,
+    override val appearance: BannerAppearance,
+    override val impressionConfig: ImpressionConfig,
+) : IBannerConfig
 
 internal data class ImpressionConfig(
     val interval: Int, // time between ad impressions (ms)
@@ -67,20 +67,12 @@ internal enum class BannerGravity {
     BOTTOM,
 }
 
-internal data class QRCodeSettings(
+internal data class QRCode(
     val checkUrl: String,
     val generateUrl: String,
-    val refreshUrl: String,
-    val expire: Long,
+    val refreshUrl: String,  // not used in POC
+    val expire: Long,        // not used in POC
     val checkInterval: Long,
 ) : Serializable
-
-internal data class QRBannerConfig(
-    val config: BannerConfig,
-    val qrCode: QRCodeSettings,
-) : IBannerConfig {
-    override val bannerId: String = config.id
-    override val impressionConfig = config.impressionConfig
-}
 
 internal object OK

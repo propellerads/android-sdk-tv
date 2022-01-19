@@ -1,4 +1,4 @@
-package com.propellerads.sdk.configurator
+package com.propellerads.sdk.configuration
 
 import com.propellerads.sdk.bannerAd.ui.IBannerConfig
 import com.propellerads.sdk.provider.adId.IAdIdProvider
@@ -6,8 +6,13 @@ import com.propellerads.sdk.provider.deviceType.IDeviceTypeProvider
 import com.propellerads.sdk.provider.publisherId.IPublisherIdProvider
 import com.propellerads.sdk.repository.*
 import com.propellerads.sdk.utils.Logger
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.min
@@ -22,6 +27,7 @@ internal class ConfigLoader(
     private companion object {
         const val REQUEST_TIMEOUT_MS_MIN = 1_000L
         const val REQUEST_TIMEOUT_MS_MAX = 15_000L
+        const val QR_RETRY_MAX_ATTEMPT = 3
     }
 
     private val _widgetsStatus = MutableStateFlow<WidgetConfigStatus>(WidgetConfigStatus.Loading)
@@ -31,6 +37,10 @@ internal class ConfigLoader(
     private val _bannersStatus = MutableStateFlow<BannerConfigStatus>(BannerConfigStatus.Loading)
     override val bannersStatus: Flow<BannerConfigStatus>
         get() = _bannersStatus
+
+    private val _qrCodesStatus = MutableStateFlow<Map<String, QRCodeStatus>>(emptyMap())
+    override val qrCodesStatus: Flow<Map<String, QRCodeStatus>>
+        get() = _qrCodesStatus
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
@@ -65,64 +75,56 @@ internal class ConfigLoader(
                         delay(delayMs)
                     }
                 }
-                .collect { resource ->
-                    resource.dataOrNull()?.let { data ->
-                        handleWidgetsRes(data.widgets)
-                        handleBannersRes(data.banners)
-                    }
-                }
+                .collect(::handleConfigurationRes)
         }
     }
 
-    private suspend fun handleWidgetsRes(widgets: List<WidgetConfig>) {
-        _widgetsStatus.emit(WidgetConfigStatus.Success(widgets))
+    private suspend fun handleConfigurationRes(resource: Resource<AdConfiguration>) {
+        resource.dataOrNull()?.let { data ->
+            _widgetsStatus.emit(WidgetConfigStatus.Success(data.widgets))
+            _bannersStatus.emit(BannerConfigStatus.Success(
+                data.banners.associateBy { it.id }
+            ))
+        }
     }
 
-    private suspend fun handleBannersRes(banners: List<BannerConfig>) {
-        // should be refactored when new banners type implementation will be required
-        val qrCodes = getQrCodesForBanners(banners)
-        val qrBanners: Map<String, IBannerConfig> = banners
-            .mapNotNull { banner ->
-                val id = banner.id
-                val qr = qrCodes[id]
-                qr?.let { id to QRBannerConfig(banner, qr) }
-            }
-            .toMap()
-
-        _bannersStatus.emit(
-            BannerConfigStatus.Success(qrBanners)
-        )
-    }
-
-    private suspend fun getQrCodesForBanners(banners: List<BannerConfig>): Map<String, QRCodeSettings> =
-        coroutineScope {
-            val qrCodesRes = banners.map { banner ->
-                async {
-                    banner.id to getQrCode(banner)
+    override fun getQrCode(banner: IBannerConfig) {
+        if (banner !is BannerConfig) return
+        launch {
+            repository.getQRCode(banner.qrCodeRequestUrl)
+                .onEach { res ->
+                    updateQRCodeStatus(banner.id, QRCodeStatus.fromResource(res))
                 }
-            }
-            qrCodesRes
-                .awaitAll()
-                .mapNotNull { pair ->
-                    pair.second?.let {
-                        pair.first to it
+                .filter { it !is Resource.Loading }
+                .retryIfFailed { res, attempt ->
+                    (attempt < QR_RETRY_MAX_ATTEMPT).also {
+                        val delayMs = getBackoffDelay(attempt)
+                        Logger.d("Get QR exception: ${res.message}; Try again in: $delayMs")
+                        delay(delayMs)
                     }
                 }
-                .toMap()
+                .collect()
         }
+    }
 
-    private suspend fun getQrCode(banner: BannerConfig): QRCodeSettings? =
-        repository.getQRCode(banner.qrCodeBackendUrl)
-            .filter { it !is Resource.Loading }
-            .retryIfFailed { res, attempt ->
-                true.also {
-                    val delayMs = getBackoffDelay(attempt)
-                    Logger.d("Get QR exception: ${res.message}; Try again in: $delayMs")
-                    delay(delayMs)
-                }
+    override fun checkQrCode(bannerId: String, qrCode: QRCode): Flow<Boolean> =
+        repository.checkQRCode(qrCode.checkUrl)
+            .retryUntilFail(qrCode.checkInterval)
+            .filter { it is Resource.Fail }
+            .onEach {
+                // drop used QR code status
+                updateQRCodeStatus(bannerId, QRCodeStatus.Loading)
             }
-            .first()
-            .dataOrNull()
+            .map { true }
+
+    private val updateStatusMutex = Mutex()
+    private suspend fun updateQRCodeStatus(bannerId: String, status: QRCodeStatus) {
+        updateStatusMutex.withLock {
+            val statusMap = _qrCodesStatus.value.toMutableMap()
+                .apply { this[bannerId] = status }
+            _qrCodesStatus.emit(statusMap)
+        }
+    }
 
     override fun impressionCallback(url: String) {
         launch {

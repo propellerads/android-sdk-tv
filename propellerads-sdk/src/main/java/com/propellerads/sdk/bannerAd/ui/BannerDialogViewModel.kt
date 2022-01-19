@@ -1,14 +1,17 @@
 package com.propellerads.sdk.bannerAd.ui
 
 import androidx.lifecycle.ViewModel
+import com.propellerads.sdk.configuration.IQRCodeLoader
+import com.propellerads.sdk.configuration.QRCodeStatus
 import com.propellerads.sdk.di.DI
-import com.propellerads.sdk.repository.*
+import com.propellerads.sdk.repository.BannerAppearance
+import com.propellerads.sdk.repository.QRCode
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.mapNotNull
 import kotlin.coroutines.CoroutineContext
 
 internal class BannerDialogViewModel : ViewModel(), CoroutineScope {
@@ -17,13 +20,30 @@ internal class BannerDialogViewModel : ViewModel(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.IO
 
+    private val qrCodeLoader: IQRCodeLoader = DI.configLoader
+
     private val _dismissFlow = MutableStateFlow(false)
-    val dismissFlow: Flow<Boolean>
+    val dismissFlow: StateFlow<Boolean>
         get() = _dismissFlow
 
-    fun setBannerConfig(bannerConfig: QRBannerConfig) {
-        startAutoDismissTimeout(bannerConfig.config.appearance)
-        startQRCodeChecking(bannerConfig.qrCode)
+    fun setBannerConfig(bannerConfig: IBannerConfig) {
+        startAutoDismissTimeout(bannerConfig.appearance)
+        if (bannerConfig.qrCodeRequestUrl != null) {
+            getQrCode(bannerConfig)
+        }
+    }
+
+    private fun getQrCode(bannerConfig: IBannerConfig) {
+        qrCodeLoader.getQrCode(bannerConfig)
+        launch {
+            qrCodeLoader.qrCodesStatus
+                .mapNotNull { status ->
+                    (status[bannerConfig.id] as? QRCodeStatus.Success)?.qrCode
+                }
+                .collect { qrCode ->
+                    startQRCodeChecking(bannerConfig.id, qrCode)
+                }
+        }
     }
 
     private fun startAutoDismissTimeout(appearance: BannerAppearance) {
@@ -45,14 +65,11 @@ internal class BannerDialogViewModel : ViewModel(), CoroutineScope {
         }
     }
 
-    private fun startQRCodeChecking(qrCodeSettings: QRCodeSettings) {
-        val checkUrl = qrCodeSettings.checkUrl
-        val interval = qrCodeSettings.checkInterval
-
-        launch {
-            DI.repo.checkQRCode(checkUrl)
-                .retryUntilFail(interval)
-                .filter { it is Resource.Fail }
+    private var qrCodeCheckingJob: Job? = null
+    private fun startQRCodeChecking(bannerId: String, qrCode: QRCode) {
+        qrCodeCheckingJob?.cancel()
+        qrCodeCheckingJob = launch {
+            qrCodeLoader.checkQrCode(bannerId, qrCode)
                 .collect {
                     Logger.d("Dismiss by QR code", "Banner")
                     dismissBanner()

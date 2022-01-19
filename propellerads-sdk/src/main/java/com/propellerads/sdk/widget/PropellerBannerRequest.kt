@@ -5,7 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.propellerads.sdk.bannerAd.ui.IBannerConfig
-import com.propellerads.sdk.configurator.BannerConfigStatus
+import com.propellerads.sdk.configuration.BannerConfigStatus
 import com.propellerads.sdk.di.DI
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.*
@@ -29,6 +29,9 @@ class PropellerBannerRequest(
         override val coroutineContext: CoroutineContext
             get() = job + Dispatchers.Main
     }
+
+    private val bannerManager = DI.bannerManager
+    private val configLoader = DI.configLoader
 
     private val requestUUID = UUID.randomUUID()
 
@@ -59,7 +62,7 @@ class PropellerBannerRequest(
 
     private fun obtainConfiguration() {
         coroutineScope.launch {
-            DI.configLoader.bannersStatus
+            configLoader.bannersStatus
                 .collect(::handleConfigurationStatus)
         }
     }
@@ -74,7 +77,7 @@ class PropellerBannerRequest(
 
     private fun handleAdConfiguration(bannerConfig: IBannerConfig) {
         Logger.d("Dispatch Banner config id: $adId", TAG)
-        DI.bannerManager.dispatchConfig(requestUUID, bannerConfig, weakFM)
+        bannerManager.dispatchConfig(requestUUID, bannerConfig, weakFM)
     }
 
     private fun onLifecycleStop() {
@@ -82,6 +85,6 @@ class PropellerBannerRequest(
         job.cancelChildren()
 
         Logger.d("Revoke banner config id: $adId", TAG)
-        DI.bannerManager.revokeConfig(requestUUID)
+        bannerManager.revokeConfig(requestUUID)
     }
 }

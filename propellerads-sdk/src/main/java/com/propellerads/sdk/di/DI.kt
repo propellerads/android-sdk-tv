@@ -7,8 +7,8 @@ import com.propellerads.sdk.api.ApiConfig
 import com.propellerads.sdk.api.ApiErrorParser
 import com.propellerads.sdk.api.IApi
 import com.propellerads.sdk.api.MockApi
-import com.propellerads.sdk.configurator.ConfigLoader
-import com.propellerads.sdk.configurator.IConfigLoader
+import com.propellerads.sdk.configuration.ConfigLoader
+import com.propellerads.sdk.configuration.IConfigLoader
 import com.propellerads.sdk.bannerAd.bannerManager.BannerManager
 import com.propellerads.sdk.bannerAd.bannerManager.IBannerManager
 import com.propellerads.sdk.provider.adId.AdIdProvider

@@ -56,7 +56,7 @@ internal class BannerManager :
             activeConfigs[requestUUID] = bannerConfig
             scheduleBannerImpression(requestUUID, bannerConfig, fm, isNewConfig = true)
         } else {
-            Logger.d("Already dispatched. Config id: ${bannerConfig.bannerId}", TAG)
+            Logger.d("Already dispatched. Config id: ${bannerConfig.id}", TAG)
         }
     }
 
@@ -65,7 +65,7 @@ internal class BannerManager :
         activeConfigs
             .remove(requestUUID)
             ?.let { bannerConfig ->
-                Logger.d("Banner revoked. Config id: ${bannerConfig.bannerId}", TAG)
+                Logger.d("Banner revoked. Config id: ${bannerConfig.id}", TAG)
             }
 
         scheduledImpressions
@@ -86,14 +86,14 @@ internal class BannerManager :
         }
 
         val displaySettings = bannerConfig.impressionConfig
-        val history = impressionHistory.get(bannerConfig.bannerId)
+        val history = impressionHistory.get(bannerConfig.id)
         val nextImpressionTime = calculateNextImpressionTime(displaySettings, history, isNewConfig)
 
         val timeToNextImpression = nextImpressionTime - System.currentTimeMillis()
         if (timeToNextImpression < DISPLAY_NOW_THRESHOLD) {
             displayBanner(requestUUID, bannerConfig, fm)
         } else {
-            Logger.d("Banner for config ${bannerConfig.bannerId} scheduled in ${timeToNextImpression / 1000.0} sec", TAG)
+            Logger.d("Banner for config ${bannerConfig.id} scheduled in ${timeToNextImpression / 1000.0} sec", TAG)
             scheduledImpressions[requestUUID] = launch {
                 delay(timeToNextImpression)
                 displayBanner(requestUUID, bannerConfig, fm)
@@ -121,7 +121,7 @@ internal class BannerManager :
         bannerConfig: IBannerConfig,
         fragmentManager: WeakReference<FragmentManager>,
     ) {
-        val bannerId = bannerConfig.bannerId
+        val bannerId = bannerConfig.id
         val fm = fragmentManager.get()
         if (fm == null || fm.isStateSaved || fm.isDestroyed) {
             Logger.d("FragmentManager is saved or destroyed; Config id: $bannerId", TAG)

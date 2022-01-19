@@ -1,6 +1,7 @@
 package com.propellerads.sdk.bannerAd.ui
 
 import androidx.fragment.app.FragmentManager
+import com.propellerads.sdk.repository.BannerAppearance
 import com.propellerads.sdk.repository.ImpressionConfig
 import java.io.Serializable
 
@@ -16,6 +17,8 @@ internal interface IBannerConfig : Serializable {
         const val CONFIG = "CONFIG"
     }
 
-    val bannerId: String
+    val id: String
+    val qrCodeRequestUrl: String?
+    val appearance: BannerAppearance
     val impressionConfig: ImpressionConfig
 }

@@ -1,4 +1,4 @@
-package com.propellerads.sdk.configurator
+package com.propellerads.sdk.configuration
 
 internal object NoPublisherIdException : Exception(
     "Please, provide PropellerAds Publisher ID in the app AndroidManifest.xml"

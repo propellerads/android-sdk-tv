@@ -1,18 +1,11 @@
 package com.propellerads.sdk.bannerAd.ui
 
-import androidx.viewbinding.ViewBinding
 import com.propellerads.sdk.R
 import com.propellerads.sdk.databinding.PropellerBannerQrBinding
-import com.propellerads.sdk.repository.QRBannerConfig
 import com.propellerads.sdk.utils.Colors
 
-internal fun ViewBinding.configure(bannerConfig: QRBannerConfig) = when (this) {
-    is PropellerBannerQrBinding -> applyStyle(bannerConfig)
-    else -> Unit
-}
-
-internal fun PropellerBannerQrBinding.applyStyle(bannerConfig: QRBannerConfig) {
-    val appearance = bannerConfig.config.appearance
+internal fun PropellerBannerQrBinding.applyStyle(bannerConfig: IBannerConfig) {
+    val appearance = bannerConfig.appearance
     title.text = appearance.titleLabel
     title.setTextColor(Colors.from(appearance.titleColor))
     description.text = appearance.descriptionLabel
