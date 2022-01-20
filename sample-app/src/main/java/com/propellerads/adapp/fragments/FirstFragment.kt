@@ -15,7 +15,7 @@ class FirstFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         PropellerBannerRequest(
-            "test_banner_2",
+            "qr_code",
             lifecycle,
             childFragmentManager
         )

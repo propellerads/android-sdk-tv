@@ -5,29 +5,36 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.propellerads.sdk.widget.PropellerButton
-        android:layout_width="match_parent"
+    <TextView
+        style="@style/TextAppearance.AppCompat.Display1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="32dp"
-        app:widget_id="test_widget_1" />
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginVertical="8dp"
+        android:text="It is the first Activity" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginVertical="8dp"
+        android:text="@string/lorem_ipsum_1"
+        android:textSize="14sp" />
 
     <com.propellerads.sdk.widget.PropellerButton
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="32dp"
-        app:widget_id="test_widget_2" />
-
-    <com.propellerads.sdk.widget.PropellerButton
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="32dp"
-        app:widget_id="test_widget_3" />
-
-    <com.propellerads.sdk.widget.PropellerButton
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="32dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginVertical="8dp"
         app:widget_id="download_now_button" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginVertical="8dp"
+        android:text="@string/lorem_ipsum_2"
+        android:textSize="14sp" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/next"

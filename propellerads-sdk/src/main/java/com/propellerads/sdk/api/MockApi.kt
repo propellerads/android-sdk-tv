@@ -85,12 +85,12 @@ internal class MockApi : IApi {
                         descriptionColor = "#000000",
                         extraDescriptionColor = "#4D000000",
                         backgroundColor = "#FFFFFF",
-                        dismissTimerValue = 10,
+                        dismissTimerValue = 20,
                         dismissTimerVisibility = false,
-                        interval = 20,
+                        interval = 40,
                         timeout = 5,
                         frequency = 3,
-                        capping = 60,
+                        capping = 120,
                     )
                 ),
                 BannerRes(

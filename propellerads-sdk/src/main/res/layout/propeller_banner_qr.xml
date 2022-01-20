@@ -85,11 +85,11 @@
         android:id="@+id/qr_code"
         android:layout_width="209dp"
         android:layout_height="209dp"
-        android:src="@drawable/mock_qr"
         app:layout_constraintBottom_toBottomOf="@+id/extra_description"
         app:layout_constraintEnd_toStartOf="@+id/endGuide"
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintStart_toStartOf="@id/middleGuide"
-        app:layout_constraintTop_toTopOf="@+id/title" />
+        app:layout_constraintTop_toTopOf="@+id/title"
+        tools:src="@drawable/mock_qr" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
