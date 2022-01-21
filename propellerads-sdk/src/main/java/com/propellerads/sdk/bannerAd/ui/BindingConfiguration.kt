@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import com.propellerads.sdk.databinding.PropellerBannerQrBinding
 import com.propellerads.sdk.repository.Resource
 import com.propellerads.sdk.utils.Colors
+import com.propellerads.sdk.utils.isVisible
 
 internal fun PropellerBannerQrBinding.applyStyle(bannerConfig: IBannerConfig) {
     val appearance = bannerConfig.appearance
@@ -18,16 +19,14 @@ internal fun PropellerBannerQrBinding.applyStyle(bannerConfig: IBannerConfig) {
 
 internal fun PropellerBannerQrBinding.setQRImage(resource: Resource<ByteArray>) {
     when (resource) {
-        is Resource.Loading -> {
-            //todo
-        }
-        is Resource.Fail -> {
-            // todo
-        }
         is Resource.Success -> {
             val bytes = resource.data
             val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             qrCode.setImageBitmap(bitmap)
+            qrProgress.isVisible = false
+        }
+        else -> {
+            // ???
         }
     }
 }

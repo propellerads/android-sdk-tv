@@ -1,6 +1,7 @@
 package com.propellerads.sdk.bannerAd.ui
 
 import android.content.res.Resources
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -14,6 +15,7 @@ import com.propellerads.sdk.databinding.PropellerBannerQrBinding
 import com.propellerads.sdk.repository.BannerAppearance
 import com.propellerads.sdk.repository.BannerGravity
 import com.propellerads.sdk.utils.Colors
+import com.propellerads.sdk.utils.dp
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
@@ -35,10 +37,6 @@ internal class BannerDialog private constructor() :
         }
     }
 
-    init {
-        isCancelable = false
-    }
-
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Main
@@ -47,9 +45,9 @@ internal class BannerDialog private constructor() :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        isCancelable = false
         // remove title space
-        setStyle(STYLE_NO_TITLE, android.R.style.Theme_Dialog)
+        setStyle(STYLE_NO_TITLE, android.R.style.Theme_DeviceDefault_Dialog)
     }
 
     override fun onCreateView(
@@ -83,10 +81,10 @@ internal class BannerDialog private constructor() :
                             .collect(this@apply::setQRImage)
                     }
                 }
-            else -> PropellerBannerQrBinding.inflate(inflater)    // todo: figure out what to do
+            else -> null
         }
 
-        return binding.root
+        return binding?.root ?: View(context).also { dismissSafely() }
     }
 
     private fun configureDialogParams(appearance: BannerAppearance) {
@@ -104,11 +102,15 @@ internal class BannerDialog private constructor() :
 
             decorView.apply {
 
-                // todo: use cornerRadius and background drawable instead
-                if (!appearance.hasRoundedCorners) {
-                    // remove dialog corner radius
-                    val background = Colors.from(appearance.backgroundColor)
-                    setBackgroundColor(background)
+                val backgroundColor = Colors.from(appearance.backgroundColor)
+                if (appearance.hasRoundedCorners) {
+                    val background = GradientDrawable().apply {
+                        setColor(backgroundColor)
+                        cornerRadius = 16.dp
+                    }
+                    setBackground(background)
+                } else {
+                    setBackgroundColor(backgroundColor)
                 }
 
                 val displayMetrics = Resources.getSystem().displayMetrics

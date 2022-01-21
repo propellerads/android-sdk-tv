@@ -92,4 +92,13 @@
         app:layout_constraintTop_toTopOf="@+id/title"
         tools:src="@drawable/mock_qr" />
 
+    <ProgressBar
+        android:id="@+id/qr_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/qr_code"
+        app:layout_constraintEnd_toEndOf="@+id/qr_code"
+        app:layout_constraintStart_toStartOf="@+id/qr_code"
+        app:layout_constraintTop_toTopOf="@+id/qr_code" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
