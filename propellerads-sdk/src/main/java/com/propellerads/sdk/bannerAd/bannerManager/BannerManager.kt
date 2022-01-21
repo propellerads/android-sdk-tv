@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.propellerads.sdk.bannerAd.bannerManager.bannerDismissListener.BannerDismissListener
 import com.propellerads.sdk.bannerAd.bannerManager.impressionHistory.IImpressionHistory
 import com.propellerads.sdk.bannerAd.bannerManager.impressionHistory.ImpressionHistory
 import com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator.IImpressionTimeCalculator
@@ -14,6 +15,9 @@ import com.propellerads.sdk.bannerAd.ui.IBannerConfig
 import com.propellerads.sdk.repository.ImpressionConfig
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.coroutines.CoroutineContext
@@ -42,6 +46,12 @@ internal class BannerManager :
     // used to calculate the next impression time
     private val impressionTimeCalculator: IImpressionTimeCalculator = ImpressionTimeCalculator(Logger)
 
+    // used to receive banner dismiss callback
+    private val dismissListener = BannerDismissListener(::onBannerDismissed)
+
+    // used to notify subscribers about banner state change
+    private val bannersStateFlow = MutableSharedFlow<Pair<UUID, Boolean>>()
+
     init {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
@@ -50,9 +60,10 @@ internal class BannerManager :
     override fun dispatchConfig(
         requestUUID: UUID,
         bannerConfig: IBannerConfig,
-        fm: WeakReference<FragmentManager>
+        fm: WeakReference<FragmentManager>,
     ) {
         if (!activeConfigs.containsKey(requestUUID)) {
+            fm.get()?.registerFragmentLifecycleCallbacks(dismissListener, false)
             activeConfigs[requestUUID] = bannerConfig
             scheduleBannerImpression(requestUUID, bannerConfig, fm, isNewConfig = true)
         } else {
@@ -61,7 +72,10 @@ internal class BannerManager :
     }
 
     @Synchronized
-    override fun revokeConfig(requestUUID: UUID) {
+    override fun revokeConfig(
+        requestUUID: UUID,
+        fm: WeakReference<FragmentManager>,
+    ) {
         activeConfigs
             .remove(requestUUID)
             ?.let { bannerConfig ->
@@ -71,6 +85,8 @@ internal class BannerManager :
         scheduledImpressions
             .remove(requestUUID)
             ?.cancel()
+
+        fm.get()?.unregisterFragmentLifecycleCallbacks(dismissListener)
     }
 
     private fun scheduleBannerImpression(
@@ -128,6 +144,8 @@ internal class BannerManager :
             return
         }
 
+        onBannerStateChanged(requestUUID, isShow = true)
+
         Logger.d("Banner for config $bannerId displayed", TAG)
 
         BannerDialog
@@ -138,6 +156,21 @@ internal class BannerManager :
 
         scheduleBannerImpression(requestUUID, bannerConfig, fragmentManager, false)
     }
+
+    private fun onBannerStateChanged(requestUUID: UUID, isShow: Boolean) {
+        launch {
+            bannersStateFlow.emit(requestUUID to isShow)
+        }
+    }
+
+    private fun onBannerDismissed(requestUUID: UUID) {
+        onBannerStateChanged(requestUUID, isShow = false)
+    }
+
+    override fun subscribeOnBannerStateChange(requestUUID: UUID) =
+        bannersStateFlow
+            .filter { it.first == requestUUID }
+            .map { it.second }
 
     override fun onStateChanged(
         source: LifecycleOwner, event: Lifecycle.Event

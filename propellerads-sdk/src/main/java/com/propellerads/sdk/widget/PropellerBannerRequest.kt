@@ -8,6 +8,7 @@ import com.propellerads.sdk.bannerAd.ui.IBannerConfig
 import com.propellerads.sdk.di.DI
 import com.propellerads.sdk.repository.Resource
 import com.propellerads.sdk.utils.Logger
+import com.propellerads.sdk.widget.PropellerBannerRequest.Callback
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import java.lang.ref.WeakReference
@@ -18,6 +19,7 @@ class PropellerBannerRequest(
     private val adId: String,
     lifecycle: Lifecycle,
     fragmentManager: FragmentManager,
+    private val callback: Callback = Callback { },
 ) : LifecycleEventObserver {
 
     private companion object {
@@ -78,6 +80,11 @@ class PropellerBannerRequest(
     private fun handleAdConfiguration(bannerConfig: IBannerConfig) {
         Logger.d("Dispatch Banner config id: $adId", TAG)
         bannerManager.dispatchConfig(requestUUID, bannerConfig, weakFM)
+        coroutineScope.launch {
+            bannerManager
+                .subscribeOnBannerStateChange(requestUUID)
+                .collect(callback::onBannerStateChanged)
+        }
     }
 
     private fun onLifecycleStop() {
@@ -85,6 +92,10 @@ class PropellerBannerRequest(
         job.cancelChildren()
 
         Logger.d("Revoke banner config id: $adId", TAG)
-        bannerManager.revokeConfig(requestUUID)
+        bannerManager.revokeConfig(requestUUID, weakFM)
+    }
+
+    fun interface Callback {
+        fun onBannerStateChanged(isShow: Boolean)
     }
 }
