@@ -4,35 +4,26 @@ plugins {
     id 'maven-publish'
 }
 
+ext {
+    PUBLISH_GROUP_ID = 'com.propellerads'
+    PUBLISH_VERSION = '1.0.1'
+    PUBLISH_ARTIFACT_ID = 'sdk'
+}
+
 task androidSourcesJar(type: Jar) {
     archiveClassifier.set('sources')
     from android.sourceSets.main.java.srcDirs
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            // Creates a Maven publication called "release".
-            release(MavenPublication) {
-                // Applies the component for the release build variant.
-                from components.release
-
-                artifact androidSourcesJar
-
-                groupId = 'com.propellerads'
-                artifactId = 'sdk'
-                version = android.defaultConfig.versionName
-            }
-        }
-    }
-}
+apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
 
 android {
     compileSdk 31
+    compileSdkVersion 31
 
     defaultConfig {
-        minSdk 21
-        targetSdk 31
+        minSdkVersion 21
+        targetSdkVersion 31
         versionCode 2
         versionName "0.0.2"
 
