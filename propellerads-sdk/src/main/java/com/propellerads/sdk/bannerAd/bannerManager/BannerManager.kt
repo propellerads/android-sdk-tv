@@ -105,6 +105,9 @@ internal class BannerManager :
         val history = impressionHistory.get(bannerConfig.id)
         val nextImpressionTime = calculateNextImpressionTime(displaySettings, history, isNewConfig)
 
+        // The next impression is not possible
+        nextImpressionTime ?: return
+
         val timeToNextImpression = nextImpressionTime - System.currentTimeMillis()
         if (timeToNextImpression < DISPLAY_NOW_THRESHOLD) {
             displayBanner(requestUUID, bannerConfig, fm)
@@ -121,7 +124,7 @@ internal class BannerManager :
         impressionConfig: ImpressionConfig,
         history: List<Long>,
         addForcedTimeout: Boolean = false,
-    ): Long = impressionTimeCalculator
+    ): Long? = impressionTimeCalculator
         .calculateNextImpressionTime(
             interval = impressionConfig.interval,
             timeout = impressionConfig.timeout,

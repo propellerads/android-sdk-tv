@@ -21,10 +21,10 @@ class ImpressionTimeCalculatorUnitTest {
     @Test
     fun `NO impressions history`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 3
-        val capping = 60_000
+        val capping = 60_000L
         val history = emptyList<Long>()
 
         val nextImpression = calculator.calculateNextImpressionTime(
@@ -43,10 +43,10 @@ class ImpressionTimeCalculatorUnitTest {
     @Test
     fun `Long time WITHOUT impressions`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 3
-        val capping = 5_000
+        val capping = 5_000L
         val history = listOf(
             currentTime - 300_000,
             currentTime - 200_000,
@@ -69,10 +69,10 @@ class ImpressionTimeCalculatorUnitTest {
     @Test
     fun `NO impressions in capping`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 3
-        val capping = 5_000
+        val capping = 5_000L
         val history = listOf(
             currentTime - 33_000,
             currentTime - 23_000,
@@ -96,10 +96,10 @@ class ImpressionTimeCalculatorUnitTest {
     @Test
     fun `MAX - 1 impressions in capping`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 4
-        val capping = 30_000
+        val capping = 30_000L
         val history = listOf(
             currentTime - 33_000,
             currentTime - 23_000,
@@ -123,10 +123,10 @@ class ImpressionTimeCalculatorUnitTest {
     @Test
     fun `MAX - 2 impressions in capping`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 5
-        val capping = 30_000
+        val capping = 30_000L
         val history = listOf(
             currentTime - 33_000,
             currentTime - 23_000,
@@ -150,10 +150,10 @@ class ImpressionTimeCalculatorUnitTest {
     @Test
     fun `MAX impressions in capping`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 3
-        val capping = 40_000
+        val capping = 40_000L
         val history = listOf(
             currentTime - 33_000,
             currentTime - 23_000,
@@ -177,10 +177,10 @@ class ImpressionTimeCalculatorUnitTest {
     @Test
     fun `MORE than MAX impressions in capping`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 2
-        val capping = 40_000
+        val capping = 40_000L
         val history = listOf(
             currentTime - 33_000,
             currentTime - 23_000,
@@ -204,10 +204,10 @@ class ImpressionTimeCalculatorUnitTest {
     @Test
     fun `ZERO capping`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 2
-        val capping = 0
+        val capping = 0L
         val history = listOf(
             currentTime - 33_000,
             currentTime - 23_000,
@@ -231,10 +231,10 @@ class ImpressionTimeCalculatorUnitTest {
     @Test
     fun `ZERO frequency`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 0
-        val capping = 30_000
+        val capping = 30_000L
         val history = listOf(
             currentTime - 33_000,
             currentTime - 23_000,
@@ -251,17 +251,16 @@ class ImpressionTimeCalculatorUnitTest {
             addForcedTimeout = addForcedTimeout,
             currentTime = currentTime,
         )
-        val expectedImpression = history.last() + interval + timeout
-        assertEquals(expectedImpression, nextImpression)
+        assertEquals(null, nextImpression)
     }
 
     @Test
     fun `ZERO capping ZERO frequency`() {
         val currentTime = System.currentTimeMillis()
-        val interval = 10_000
-        val timeout = 5_000
+        val interval = 10_000L
+        val timeout = 5_000L
         val maxFrequency = 0
-        val capping = 0
+        val capping = 0L
         val history = listOf(
             currentTime - 33_000,
             currentTime - 23_000,
@@ -278,7 +277,6 @@ class ImpressionTimeCalculatorUnitTest {
             addForcedTimeout = addForcedTimeout,
             currentTime = currentTime,
         )
-        val expectedImpression = history.last() + interval + timeout
-        assertEquals(expectedImpression, nextImpression)
+        assertEquals(null, nextImpression)
     }
 }

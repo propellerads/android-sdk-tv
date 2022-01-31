@@ -19,7 +19,7 @@ internal class ImpressionTimeCalculator(
         history: List<Long>,
         addForcedTimeout: Boolean,
         currentTime: Long,
-    ): Long {
+    ): Long? {
 
         // if no previous impressions then schedule the next one after initial timeout
         if (history.isEmpty()) {
@@ -34,9 +34,15 @@ internal class ImpressionTimeCalculator(
         val minNextImpressionTime = currentTime + forcedTimeout
         val nextImpressionTime = max(lastWithInterval, minNextImpressionTime)
 
-        // if capping or frequency parameters are not presented then return nextImpressionTime
-        if (maxFrequency == 0 || capping == 0L) {
-            logger.d("No frequency rules. Schedule the next with the regular interval", TAG)
+        // if frequency is not presented then the next impression is impossible
+        if (maxFrequency == 0) {
+            logger.d("Frequency == 0. The next impression is impossible", TAG)
+            return null
+        }
+
+        // if capping parameters is not presented then the next impression at the regular interval
+        if (capping == 0L) {
+            logger.d("Capping == 0. Schedule the next at the regular interval", TAG)
             return nextImpressionTime
         }
 

@@ -10,5 +10,5 @@ interface IImpressionTimeCalculator {
         history: List<Long>,
         addForcedTimeout: Boolean,
         currentTime: Long,
-    ): Long
+    ): Long?
 }
