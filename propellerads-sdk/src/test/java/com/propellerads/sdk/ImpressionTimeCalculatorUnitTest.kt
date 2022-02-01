@@ -255,6 +255,27 @@ class ImpressionTimeCalculatorUnitTest {
     }
 
     @Test
+    fun `ZERO frequency NO history`() {
+        val currentTime = System.currentTimeMillis()
+        val interval = 10_000L
+        val timeout = 5_000L
+        val maxFrequency = 0
+        val capping = 30_000L
+        val history = emptyList<Long>()
+        val addForcedTimeout = true
+        val nextImpression = calculator.calculateNextImpressionTime(
+            interval = interval,
+            timeout = timeout,
+            maxFrequency = maxFrequency,
+            capping = capping,
+            history = history,
+            addForcedTimeout = addForcedTimeout,
+            currentTime = currentTime,
+        )
+        assertEquals(null, nextImpression)
+    }
+
+    @Test
     fun `ZERO capping ZERO frequency`() {
         val currentTime = System.currentTimeMillis()
         val interval = 10_000L
