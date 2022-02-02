@@ -6,6 +6,7 @@ buildscript {
         maven {
             url "${artifactory_url}"
             name = "artifactory"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.4'
