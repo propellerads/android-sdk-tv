@@ -6,7 +6,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'com.propellerads'
-    PUBLISH_VERSION = ${publishVersion}
+    PUBLISH_VERSION = "${publishVersion}"
     PUBLISH_ARTIFACT_ID = 'sdk'
 }
 
