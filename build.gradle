@@ -4,11 +4,7 @@ buildscript {
         google()
         mavenCentral()
         maven {
-            url '${artifactory_url}'
-            credentials {
-                username = "${artifactory_user}"
-                password = "${artifactory_password}"
-            }
+            url "${artifactory_url}"
             name = "artifactory"
     }
     dependencies {
