@@ -1,8 +1,25 @@
 apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'signing'
 
 artifacts {
     archives androidSourcesJar
+}
+
+artifactory {
+    contextUrl = "${artifactory_url}"
+    publish {
+        repository {
+            repoKey = 'propellerads-sdk'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+ 
+        }       
+        defaults {
+            publications ('snapshot')
+        }
+    }
 }
 
 afterEvaluate {
@@ -47,15 +64,57 @@ afterEvaluate {
                     }
                 }
             }
+
+            snapshot(MavenPublication) {
+                groupId PUBLISH_GROUP_ID
+                artifactId PUBLISH_ARTIFACT_ID
+                version PUBLISH_VERSION
+
+                if (project.plugins.findPlugin("com.android.library")) {
+                    from components.release
+                } else {
+                    from components.java
+                }
+
+                artifact androidSourcesJar
+
+                pom {
+                    name = PUBLISH_ARTIFACT_ID
+                    description = 'PropellerAds SDK for Android TV'
+                    url = 'https://github.com/propellerads/android-sdk-tv'
+                    licenses {
+                        license {
+                            name = 'Apache License 2.0'
+                            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'propellerads'
+                            name = 'PropellerAds'
+                            email = 'noc@propellerads.net'
+                        }
+                        
+                    }
+
+                    scm {
+                        connection = 'scm:github.com/propellerads/android-sdk-tv.git'
+                        developerConnection = 'scm:git:ssh://github.com/propellerads/android-sdk-tv.git'
+                        url = 'https://github.com/propellerads/android-sdk-tv/tree/main'
+                    }
+                }
+            }
         }
     }
 }
 
 signing {
-    useInMemoryPgpKeys(
-            rootProject.ext["signing.keyId"],
-            rootProject.ext["signing.key"],
-            rootProject.ext["signing.password"],
-    )
-    sign publishing.publications
+    publishing.publications.release {
+        useInMemoryPgpKeys(
+                rootProject.ext["signing.keyId"],
+                rootProject.ext["signing.key"],
+                rootProject.ext["signing.password"],
+        )
+        sign publishing.publications
+    }
 }
