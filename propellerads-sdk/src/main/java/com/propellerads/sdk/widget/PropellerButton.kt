@@ -13,8 +13,8 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.browser.customtabs.CustomTabsIntent
 import com.propellerads.sdk.R
-import com.propellerads.sdk.configurator.AdConfigState
 import com.propellerads.sdk.di.DI
+import com.propellerads.sdk.repository.Resource
 import com.propellerads.sdk.repository.WidgetConfig
 import com.propellerads.sdk.utils.*
 import kotlinx.coroutines.*
@@ -34,10 +34,9 @@ class PropellerButton @JvmOverloads constructor(
     private val coroutineScope = object : CoroutineScope {
         override val coroutineContext: CoroutineContext
             get() = job + Dispatchers.Main
-
     }
 
-    private val adConfigurator = DI.adConfigurator
+    private val adConfigurator = DI.configLoader
 
     private val button: AppCompatButton
     private val progress: ProgressBar
@@ -78,21 +77,22 @@ class PropellerButton @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         coroutineScope.launch {
-            adConfigurator.state
+            adConfigurator.widgetsStatus
                 .combine(widgetIdState, ::Pair)
-                .collect(::handleConfiguration)
+                .collect(::handleConfigurationRes)
         }
     }
 
-    private fun handleConfiguration(pair: Pair<AdConfigState, String>) {
-        val (config, widgetId) = pair
-        when (config) {
-            is AdConfigState.Loading -> {
+    private fun handleConfigurationRes(
+        pair: Pair<Resource<Map<String, WidgetConfig>>, String>
+    ) {
+        val (resource, widgetId) = pair
+        when (resource) {
+            is Resource.Loading -> {
                 setContent(hasProgress = true)
             }
-            is AdConfigState.Success -> {
-                val widgetConfig = config.widgets
-                    .firstOrNull { it.id == widgetId }
+            is Resource.Success -> {
+                val widgetConfig = resource.data[widgetId]
                 if (widgetConfig != null) {
                     configureWidget(widgetConfig)
                     setContent(hasButton = true)
@@ -105,8 +105,8 @@ class PropellerButton @JvmOverloads constructor(
                     setContent(hasErrorView = true)
                 }
             }
-            is AdConfigState.Error -> {
-                errorView.text = config.exception?.message ?: "API exception"
+            is Resource.Fail -> {
+                errorView.text = resource.exception?.message ?: "API exception"
                 setContent(hasErrorView = true)
             }
         }
