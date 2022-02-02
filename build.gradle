@@ -5,6 +5,7 @@ buildscript {
         mavenCentral()
         maven {
             url "http://artifactory01.rtty.in:8081/artifactory/propellerads-sdk"
+            allowInsecureProtocol = true
             name = "artifactory"
         }
     }
