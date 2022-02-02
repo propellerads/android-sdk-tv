@@ -4,7 +4,7 @@ buildscript {
         google()
         mavenCentral()
         maven {
-            url "${artifactory_url}"
+            url "http://artifactory01.rtty.in:8081/artifactory/propellerads-sdk"
             name = "artifactory"
         }
     }
