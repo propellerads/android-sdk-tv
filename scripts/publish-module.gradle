@@ -7,19 +7,17 @@ artifacts {
 }
 
 artifactory {
-    contextUrl = "http://artifactory01.rtty.in:8081/artifactory/ext-snapshot-local"
+    contextUrl = "http://artifactory01.rtty.in:8081/artifactory"
     publish {
         repository {
-            repoKey = 'propellerads-sdk'
+            repoKey = "ext-snapshot-local"
+            username = "${artifactoryLogin}"
+            password = "${artifactoryPassword}"
             maven = true
         }  
         authentication {
             basic(BasicAuthentication)
         }   
-        credentials {
-            username "${artifactoryLogin}"
-            password "${artifactoryPassword}"
-        }  
         defaults {
             publications ('release')
         }
