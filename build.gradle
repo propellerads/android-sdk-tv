@@ -4,7 +4,7 @@ buildscript {
         google()
         mavenCentral()
         maven {
-            url "http://artifactory01.rtty.in:8081/artifactory"
+            url "http://artifactory01.rtty.in:8081/artifactory/ext-snapshot-local"
             allowInsecureProtocol = true
             name = "artifactory"
         }

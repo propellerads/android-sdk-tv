@@ -7,14 +7,21 @@ artifacts {
 }
 
 artifactory {
-    contextUrl = "http://artifactory01.rtty.in:8081/artifactory"
+    contextUrl = "http://artifactory01.rtty.in:8081/artifactory/ext-snapshot-local"
     publish {
         repository {
             repoKey = 'propellerads-sdk'
             maven = true
-        }       
+        }  
+        authentication {
+            basic(BasicAuthentication)
+        }   
+        credentials {
+            username "${artifactoryLogin}"
+            password "${artifactoryPassword}"
+        }  
         defaults {
-            publications ('snapshot')
+            publications ('release')
         }
     }
 }
@@ -23,46 +30,6 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                groupId PUBLISH_GROUP_ID
-                artifactId PUBLISH_ARTIFACT_ID
-                version PUBLISH_VERSION
-
-                if (project.plugins.findPlugin("com.android.library")) {
-                    from components.release
-                } else {
-                    from components.java
-                }
-
-                artifact androidSourcesJar
-
-                pom {
-                    name = PUBLISH_ARTIFACT_ID
-                    description = 'PropellerAds SDK for Android TV'
-                    url = 'https://github.com/propellerads/android-sdk-tv'
-                    licenses {
-                        license {
-                            name = 'Apache License 2.0'
-                            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = 'propellerads'
-                            name = 'PropellerAds'
-                            email = 'noc@propellerads.net'
-                        }
-                        
-                    }
-
-                    scm {
-                        connection = 'scm:github.com/propellerads/android-sdk-tv.git'
-                        developerConnection = 'scm:git:ssh://github.com/propellerads/android-sdk-tv.git'
-                        url = 'https://github.com/propellerads/android-sdk-tv/tree/main'
-                    }
-                }
-            }
-
-            snapshot(MavenPublication) {
                 groupId PUBLISH_GROUP_ID
                 artifactId PUBLISH_ARTIFACT_ID
                 version PUBLISH_VERSION
