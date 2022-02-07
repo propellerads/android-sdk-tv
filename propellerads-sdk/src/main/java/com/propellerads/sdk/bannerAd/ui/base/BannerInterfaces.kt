@@ -1,9 +1,9 @@
-package com.propellerads.sdk.bannerAd.ui
+package com.propellerads.sdk.bannerAd.ui.base
 
 import androidx.fragment.app.FragmentManager
-import com.propellerads.sdk.repository.BannerAppearance
 import com.propellerads.sdk.repository.ImpressionConfig
 import java.io.Serializable
+import java.util.*
 
 internal interface IBanner {
 
@@ -18,7 +18,18 @@ internal interface IBannerConfig : Serializable {
     }
 
     val id: String
-    val qrCodeRequestUrl: String?
-    val appearance: BannerAppearance
     val impressionConfig: ImpressionConfig
 }
+
+internal interface IBannerBuilder {
+    fun build(
+        requestUUID: UUID,
+        config: IBannerConfig
+    ): IBanner
+}
+
+internal fun IBannerBuilder.display(
+    requestUUID: UUID,
+    config: IBannerConfig,
+    fragmentManager: FragmentManager,
+) = this.build(requestUUID, config).show(fragmentManager)

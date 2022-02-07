@@ -61,7 +61,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
         android:contentDescription=""
-        android:src="@drawable/ic_qr_reader"
+        android:src="@drawable/propeller_ic_qr_reader"
         app:layout_constraintEnd_toEndOf="@+id/title"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toEndOf="@+id/description"
@@ -90,7 +90,7 @@
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintStart_toStartOf="@id/middleGuide"
         app:layout_constraintTop_toTopOf="@+id/title"
-        tools:src="@drawable/mock_qr" />
+        tools:src="@drawable/propeller_mock_qr" />
 
     <ProgressBar
         android:id="@+id/qr_progress"

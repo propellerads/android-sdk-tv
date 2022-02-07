@@ -1,4 +1,4 @@
-package com.propellerads.sdk.bannerAd.ui
+package com.propellerads.sdk.bannerAd.ui.qr
 
 import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
@@ -6,30 +6,29 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
+import com.propellerads.sdk.bannerAd.ui.base.IBannerConfig
+import com.propellerads.sdk.bannerAd.ui.base.BaseBannerDialog
+import com.propellerads.sdk.bannerAd.ui.base.IBannerBuilder
 import com.propellerads.sdk.databinding.PropellerBannerQrBinding
 import com.propellerads.sdk.repository.BannerAppearance
 import com.propellerads.sdk.repository.BannerGravity
 import com.propellerads.sdk.utils.Colors
 import com.propellerads.sdk.utils.dp
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 
-internal class BannerDialog private constructor() :
-    DialogFragment(), IBanner, CoroutineScope {
+internal class QRBannerDialog
+private constructor() : BaseBannerDialog() {
 
-    companion object {
-        fun build(
+    companion object : IBannerBuilder {
+        override fun build(
             requestUUID: UUID,
             config: IBannerConfig
-        ) = BannerDialog().apply {
+        ) = QRBannerDialog().apply {
             arguments = Bundle().apply {
                 putSerializable(IBannerConfig.REQUEST_UUID, requestUUID)
                 putSerializable(IBannerConfig.CONFIG, config)
@@ -37,38 +36,22 @@ internal class BannerDialog private constructor() :
         }
     }
 
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+    private val viewModel: QRBannerDialogViewModel by viewModels()
 
-    private val viewModel: BannerDialogViewModel by viewModels()
+    override val dismissFlow: Flow<Boolean>
+        get() = viewModel.dismissFlow
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        isCancelable = false
-        // remove title space
-        setStyle(STYLE_NO_TITLE, android.R.style.Theme_DeviceDefault_Dialog)
-    }
-
-    override fun onCreateView(
+    override fun configureBanner(
         inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        bannerConfig: IBannerConfig
     ): View? {
-        val bannerConfig = arguments?.getSerializable(IBannerConfig.CONFIG) as? IBannerConfig
-        if (bannerConfig == null) {
+
+        if (bannerConfig !is IQRBannerConfig) {
             dismissSafely()
             return null
         }
 
-        return configureBanner(inflater, bannerConfig)
-    }
-
-    private fun configureBanner(
-        inflater: LayoutInflater,
-        bannerConfig: IBannerConfig,
-    ): View {
-        viewModel.setBannerConfig(bannerConfig)
+        viewModel.setConfig(bannerConfig)
 
         configureDialogParams(bannerConfig.appearance)
 
@@ -131,35 +114,5 @@ internal class BannerDialog private constructor() :
                 getSize(appearance.isFullHeight)
             )
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        subscribeOnDismiss()
-    }
-
-    private fun subscribeOnDismiss() {
-        launch {
-            viewModel.dismissFlow
-                .filter { it }
-                .collect {
-                    dismissSafely()
-                }
-        }
-    }
-
-    override fun show(fragmentManager: FragmentManager) {
-        show(fragmentManager, null)
-    }
-
-    private fun dismissSafely() {
-        if (!isStateSaved) {
-            dismiss()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        job.cancelChildren()
     }
 }

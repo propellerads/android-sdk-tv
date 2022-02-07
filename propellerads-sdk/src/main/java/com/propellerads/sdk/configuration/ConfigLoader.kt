@@ -1,6 +1,6 @@
 package com.propellerads.sdk.configuration
 
-import com.propellerads.sdk.bannerAd.ui.IBannerConfig
+import com.propellerads.sdk.bannerAd.ui.base.IBannerConfig
 import com.propellerads.sdk.provider.adId.IAdIdProvider
 import com.propellerads.sdk.provider.deviceType.IDeviceTypeProvider
 import com.propellerads.sdk.provider.publisherId.IPublisherIdProvider
@@ -84,9 +84,13 @@ internal class ConfigLoader(
             _widgetsStatus.emit(Resource.Success(
                 data.widgets.associateBy { it.id }
             ))
-            _bannersStatus.emit(Resource.Success(
-                data.banners.associateBy { it.id }
-            ))
+            val banners = data.banners.associateBy { it.id }
+            val interstitials = data.interstitials.associateBy { it.id }
+            _bannersStatus.emit(
+                Resource.Success(
+                    banners + interstitials
+                )
+            )
         }
     }
 
@@ -129,7 +133,7 @@ internal class ConfigLoader(
         }
     }
 
-    override fun impressionCallback(url: String) {
+    override fun callbackImpression(url: String) {
         launch {
             Logger.d("Invoke impression callback: $url")
             repository.impressionCallback(url)

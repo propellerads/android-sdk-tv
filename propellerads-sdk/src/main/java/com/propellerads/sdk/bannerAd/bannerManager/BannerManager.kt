@@ -10,8 +10,12 @@ import com.propellerads.sdk.bannerAd.bannerManager.impressionHistory.IImpression
 import com.propellerads.sdk.bannerAd.bannerManager.impressionHistory.ImpressionHistory
 import com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator.IImpressionTimeCalculator
 import com.propellerads.sdk.bannerAd.bannerManager.impressionTimeCalculator.ImpressionTimeCalculator
-import com.propellerads.sdk.bannerAd.ui.BannerDialog
-import com.propellerads.sdk.bannerAd.ui.IBannerConfig
+import com.propellerads.sdk.bannerAd.ui.base.IBannerConfig
+import com.propellerads.sdk.bannerAd.ui.base.display
+import com.propellerads.sdk.bannerAd.ui.interstitial.IInterstitialConfig
+import com.propellerads.sdk.bannerAd.ui.interstitial.InterstitialDialog
+import com.propellerads.sdk.bannerAd.ui.qr.IQRBannerConfig
+import com.propellerads.sdk.bannerAd.ui.qr.QRBannerDialog
 import com.propellerads.sdk.repository.ImpressionConfig
 import com.propellerads.sdk.utils.Logger
 import kotlinx.coroutines.*
@@ -110,12 +114,12 @@ internal class BannerManager :
 
         val timeToNextImpression = nextImpressionTime - System.currentTimeMillis()
         if (timeToNextImpression < DISPLAY_NOW_THRESHOLD) {
-            displayBanner(requestUUID, bannerConfig, fm)
+            checkConditionsAndDisplayBanner(requestUUID, bannerConfig, fm)
         } else {
             Logger.d("Banner for config ${bannerConfig.id} scheduled in ${timeToNextImpression / 1000.0} sec", TAG)
             scheduledImpressions[requestUUID] = launch {
                 delay(timeToNextImpression)
-                displayBanner(requestUUID, bannerConfig, fm)
+                checkConditionsAndDisplayBanner(requestUUID, bannerConfig, fm)
             }
         }
     }
@@ -135,29 +139,56 @@ internal class BannerManager :
             currentTime = System.currentTimeMillis(),
         )
 
-    private fun displayBanner(
+    private fun checkConditionsAndDisplayBanner(
         requestUUID: UUID,
-        bannerConfig: IBannerConfig,
+        config: IBannerConfig,
         fragmentManager: WeakReference<FragmentManager>,
     ) {
-        val bannerId = bannerConfig.id
+        val bannerId = config.id
         val fm = fragmentManager.get()
+
         if (fm == null || fm.isStateSaved || fm.isDestroyed) {
             Logger.d("FragmentManager is saved or destroyed; Config id: $bannerId", TAG)
             return
         }
 
+        // if previous banner is still visible then:
+        // - skip current impression
+        // - add skipped impression to the history to prevent infinity loop
+        // - schedule the new banner impression
+        if (fm.findFragmentByTag(bannerId) != null) {
+            Logger.d("Banner with the same id ($bannerId) is still visible", TAG)
+            updateHistoryAndScheduleNextBanner(requestUUID, config, fragmentManager)
+            return
+        }
+
+        displayBanner(requestUUID, config, fm)
+        updateHistoryAndScheduleNextBanner(requestUUID, config, fragmentManager)
+    }
+
+    private fun displayBanner(
+        requestUUID: UUID,
+        config: IBannerConfig,
+        fragmentManager: FragmentManager,
+    ) {
         onBannerStateChanged(requestUUID, isShow = true)
 
-        Logger.d("Banner for config $bannerId displayed", TAG)
+        Logger.d("Banner for config id ${config.id} is displayed", TAG)
 
-        BannerDialog
-            .build(requestUUID, bannerConfig)
-            .show(fm)
+        when (config) {
+            is IQRBannerConfig -> QRBannerDialog
+            is IInterstitialConfig -> InterstitialDialog
+            else -> null
+        }?.display(requestUUID, config, fragmentManager)
+    }
 
-        impressionHistory.add(bannerId, System.currentTimeMillis())
-
-        scheduleBannerImpression(requestUUID, bannerConfig, fragmentManager, false)
+    private fun updateHistoryAndScheduleNextBanner(
+        requestUUID: UUID,
+        config: IBannerConfig,
+        fragmentManager: WeakReference<FragmentManager>,
+    ) {
+        impressionHistory.add(config.id, System.currentTimeMillis())
+        scheduleBannerImpression(requestUUID, config, fragmentManager, false)
     }
 
     private fun onBannerStateChanged(requestUUID: UUID, isShow: Boolean) {
