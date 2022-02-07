@@ -2,7 +2,6 @@ package com.propellerads.sdk.bannerAd.ui.interstitial
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -33,6 +32,7 @@ private constructor() : BaseBannerDialog() {
                 putSerializable(IBannerConfig.CONFIG, config)
             }
         }
+
         private const val TAG = "Banner"
     }
 
@@ -66,13 +66,10 @@ private constructor() : BaseBannerDialog() {
         config: IInterstitialConfig
     ): PropellerBannerInterstitionalBinding {
 
-        dialog?.window?.apply {
-            decorView.apply {
-                val displayMetrics = Resources.getSystem().displayMetrics
-                minimumWidth = displayMetrics.widthPixels
-                minimumHeight = displayMetrics.heightPixels
-            }
-        }
+        configureFullScreen(
+            isFullWidth = true,
+            isFullHeight = true
+        )
 
         val binding = PropellerBannerInterstitionalBinding.inflate(inflater)
         viewBinding = binding

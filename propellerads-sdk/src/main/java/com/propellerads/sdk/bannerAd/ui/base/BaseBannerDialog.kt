@@ -1,11 +1,18 @@
 package com.propellerads.sdk.bannerAd.ui.base
 
+import android.content.res.Resources
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
+import com.propellerads.sdk.repository.BannerGravity
+import com.propellerads.sdk.utils.Colors
+import com.propellerads.sdk.utils.dp
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -49,6 +56,66 @@ internal abstract class BaseBannerDialog :
         inflater: LayoutInflater,
         bannerConfig: IBannerConfig,
     ): View?
+
+    protected fun configureFullScreen(
+        isFullWidth: Boolean,
+        isFullHeight: Boolean,
+    ) {
+        dialog?.window?.apply {
+
+            decorView.apply {
+
+                val displayMetrics = Resources.getSystem().displayMetrics
+                if (isFullWidth) {
+                    minimumWidth = displayMetrics.widthPixels
+                }
+                if (isFullHeight) {
+                    minimumHeight = displayMetrics.heightPixels
+                }
+            }
+
+            fun getSize(isFull: Boolean) =
+                if (isFull) FrameLayout.LayoutParams.MATCH_PARENT
+                else FrameLayout.LayoutParams.WRAP_CONTENT
+
+            setLayout(
+                getSize(isFullWidth),
+                getSize(isFullHeight)
+            )
+        }
+    }
+
+    protected fun configureGravity(
+        vertical: BannerGravity,
+    ) {
+        dialog?.window?.apply {
+            when (vertical) {
+                BannerGravity.TOP -> Gravity.TOP
+                BannerGravity.BOTTOM -> Gravity.BOTTOM
+                BannerGravity.CENTER -> null
+            }?.let { verticalGravity ->
+                setGravity(Gravity.CENTER_HORIZONTAL or verticalGravity)
+            }
+        }
+    }
+
+    protected fun configureBackground(
+        color: String,
+        hasRoundedCorners: Boolean,
+    ) {
+        dialog?.window?.decorView?.apply {
+            val backgroundColor = Colors.from(color)
+            if (hasRoundedCorners) {
+                val background = GradientDrawable().apply {
+                    setColor(backgroundColor)
+                    cornerRadius = 16.dp
+                }
+                setBackground(background)
+            } else {
+                setBackgroundColor(backgroundColor)
+            }
+        }
+    }
 
     override fun onResume() {
         super.onResume()
