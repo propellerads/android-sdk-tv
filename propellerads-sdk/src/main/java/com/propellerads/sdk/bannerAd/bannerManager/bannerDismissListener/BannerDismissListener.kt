@@ -2,8 +2,8 @@ package com.propellerads.sdk.bannerAd.bannerManager.bannerDismissListener
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.propellerads.sdk.bannerAd.ui.IBanner
-import com.propellerads.sdk.bannerAd.ui.IBannerConfig
+import com.propellerads.sdk.bannerAd.ui.base.IBanner
+import com.propellerads.sdk.bannerAd.ui.base.IBannerConfig
 import com.propellerads.sdk.utils.Logger
 import java.util.*
 

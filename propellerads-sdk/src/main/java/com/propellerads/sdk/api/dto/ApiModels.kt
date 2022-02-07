@@ -9,10 +9,12 @@ internal const val MILLISECONDS = 1000L
 internal data class SettingsRes(
     val widgets: List<WidgetRes>?,
     val banners: List<BannerRes>?,
+    val interstitials: List<InterstitialRes>?
 ) : Mappable<AdConfiguration> {
     override fun map() = AdConfiguration(
         widgets = widgets?.map(WidgetRes::map) ?: emptyList(),
         banners = banners?.map(BannerRes::map) ?: emptyList(),
+        interstitials = interstitials?.map(InterstitialRes::map) ?: emptyList(),
     )
 }
 
@@ -146,6 +148,45 @@ internal data class QRCodeSettingsRes(
         linksExpiredAt = linksExpiredAt * MILLISECONDS,
         checkInterval = checkUrlInterval * MILLISECONDS,
     )
+}
+
+internal data class InterstitialRes(
+    val id: String,
+    val interstitialUrl: String,
+    val impressionUrl: String,
+    val settings: InterstitialSettingsRes,
+) : Mappable<InterstitialConfig> {
+    override fun map() = settings.map().let { (appearance, impressionConfig) ->
+        InterstitialConfig(
+            id = id,
+            interstitialUrl = interstitialUrl,
+            impressionUrl = impressionUrl,
+            appearance = appearance,
+            impressionConfig = impressionConfig,
+        )
+    }
+}
+
+internal data class InterstitialSettingsRes(
+    val interval: Int,
+    val timeout: Int,
+    val frequency: Int,
+    val capping: Int,
+    val showCrossTimer: Long,
+) : Mappable<Pair<InterstitialAppearance, ImpressionConfig>> {
+    override fun map(): Pair<InterstitialAppearance, ImpressionConfig> {
+        val appearance = InterstitialAppearance(
+            showCrossTimer = showCrossTimer * MILLISECONDS,
+        )
+
+        val impression = ImpressionConfig(
+            interval = interval * MILLISECONDS,
+            timeout = timeout * MILLISECONDS,
+            frequency = frequency,
+            capping = capping * MILLISECONDS,
+        )
+        return appearance to impression
+    }
 }
 
 internal object OkRes : Mappable<OK> {

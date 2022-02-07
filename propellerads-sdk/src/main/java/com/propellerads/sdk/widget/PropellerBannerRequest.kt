@@ -4,7 +4,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.propellerads.sdk.bannerAd.ui.IBannerConfig
+import com.propellerads.sdk.bannerAd.ui.base.IBannerConfig
 import com.propellerads.sdk.di.DI
 import com.propellerads.sdk.repository.Resource
 import com.propellerads.sdk.utils.Logger

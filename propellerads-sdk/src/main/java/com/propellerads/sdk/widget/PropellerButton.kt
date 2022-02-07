@@ -160,7 +160,7 @@ class PropellerButton @JvmOverloads constructor(
     private fun handleClick(widgetConfig: WidgetConfig) {
         if (widgetConfig.browserUrl.isNotEmpty()) {
             if (context.hasCustomTabsBrowser()) {
-                adConfigurator.impressionCallback(widgetConfig.impressionUrl)
+                adConfigurator.callbackImpression(widgetConfig.impressionUrl)
                 openBrowser(widgetConfig.browserUrl)
             } else {
                 Logger.d("Android device does not support Web browsing")

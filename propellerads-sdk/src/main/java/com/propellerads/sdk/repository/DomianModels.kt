@@ -1,11 +1,13 @@
 package com.propellerads.sdk.repository
 
-import com.propellerads.sdk.bannerAd.ui.IBannerConfig
+import com.propellerads.sdk.bannerAd.ui.interstitial.IInterstitialConfig
+import com.propellerads.sdk.bannerAd.ui.qr.IQRBannerConfig
 import java.io.Serializable
 
 internal data class AdConfiguration(
     val widgets: List<WidgetConfig>,
     val banners: List<BannerConfig>,
+    val interstitials: List<InterstitialConfig>,
 )
 
 internal data class WidgetConfig(
@@ -34,7 +36,7 @@ internal data class BannerConfig(
     override val qrCodeRequestUrl: String,
     override val appearance: BannerAppearance,
     override val impressionConfig: ImpressionConfig,
-) : IBannerConfig
+) : IQRBannerConfig
 
 internal data class ImpressionConfig(
     val interval: Long, // time between ad impressions (ms)
@@ -73,6 +75,18 @@ internal data class QRCode(
     val qrCodeTtl: Long,        // not used in POC
     val linksExpiredAt: Long,   // not used in POC
     val checkInterval: Long,
+) : Serializable
+
+internal data class InterstitialConfig(
+    override val id: String,
+    override val interstitialUrl: String,
+    override val impressionUrl: String,
+    override val appearance: InterstitialAppearance,
+    override val impressionConfig: ImpressionConfig,
+) : IInterstitialConfig
+
+internal data class InterstitialAppearance(
+    val showCrossTimer: Long,
 ) : Serializable
 
 internal object OK

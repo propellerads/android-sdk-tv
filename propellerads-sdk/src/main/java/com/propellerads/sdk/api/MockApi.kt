@@ -50,7 +50,7 @@ internal class MockApi : IApi {
                     )
                 )
             ),
-            banners = listOf(
+            banners = if (deviceType == DeviceTypeReq.OTHER) emptyList() else listOf(
                 BannerRes(
                     id = "qr_code_1",
                     qrCodeBackendUrl = "https://propeller.backend/qrCodeBackendUrl",
@@ -97,6 +97,22 @@ internal class MockApi : IApi {
                         timeout = 5,
                         frequency = 3,
                         capping = 50,
+                    )
+                )
+            ),
+            interstitials = if (deviceType == DeviceTypeReq.TV) emptyList() else listOf(
+                InterstitialRes(
+                    id = "interstitial_test",
+                    interstitialUrl = "https://www.knowtop.top/",
+//                    interstitialUrl = "https://www.knowtop.top/test-stitial",
+//                    interstitialUrl = "https://teu.myappluck.com/pydBRp?keyword=propeller&cost={cost}&currency=usd&external_id=\${SUBID}&creative_id={bannerid}&ad_campaign_id={campaignid}&source={zoneid}",
+                    impressionUrl = "google.com",
+                    settings = InterstitialSettingsRes(
+                        interval = 10,
+                        timeout = 3,
+                        frequency = 3,
+                        capping = 120,
+                        showCrossTimer = 7
                     )
                 )
             )
