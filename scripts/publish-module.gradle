@@ -2,8 +2,11 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'signing'
 
+def jarFile = file("${project.buildDir}/libs/sdk-${publishVersion}.jar")
+
 artifacts {
     archives androidSourcesJar
+    archives jarFile
 }
 
 artifactory {
@@ -39,6 +42,7 @@ afterEvaluate {
                 }
 
                 artifact androidSourcesJar
+                artifact jarFile
 
                 pom {
                     name = PUBLISH_ARTIFACT_ID

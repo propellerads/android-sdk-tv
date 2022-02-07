@@ -15,6 +15,19 @@ task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
+task clearJar(type: Delete) {
+    delete "${project.buildDir}/libs/" + "sdk-${publishVersion}"
+}
+
+task makeJar(type: Copy) {
+    from("${project.buildDir}/intermediates/aar_main_jar/release/")
+    into("${project.buildDir}/libs/")
+    include('classes.jar')
+    rename('classes.jar', "sdk-${publishVersion}.jar")
+}
+
+makeJar.dependsOn(clearJar, build)
+
 apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
 
 android {
