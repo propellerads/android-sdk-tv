@@ -11,8 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.min
@@ -38,16 +36,15 @@ internal class ConfigLoader(
     override val bannersStatus: Flow<Resource<Map<String, IBannerConfig>>>
         get() = _bannersStatus
 
-    private val _qrCodesStatus = MutableStateFlow<Map<String, Resource<QRCode>>>(emptyMap())
-    override val qrCodesStatus: Flow<Map<String, Resource<QRCode>>>
-        get() = _qrCodesStatus
-
     override val coroutineContext: CoroutineContext = Dispatchers.IO
 
     init {
         getConfiguration()
     }
 
+    /**
+     * Request all Advertising formats
+     */
     private fun getConfiguration() {
         val publisherId = publisherIdProvider.getPublisherId()
         val userId = adIdProvider.getAdId()
@@ -94,19 +91,21 @@ internal class ConfigLoader(
         }
     }
 
-    override fun getQrCode(banner: IBannerConfig) {
-        if (banner !is BannerConfig) return
-        launch {
-            repository.getQRCode(banner.qrCodeRequestUrl)
-                .onEach { updateQRCodeStatus(banner.id, it) }
-                .filter { it !is Resource.Loading }
-                .retryIfFailed { res, attempt ->
-                    handleRetry(res, attempt, QR_RETRY_MAX_ATTEMPT, "Get QR exception")
-                }
-                .collect()
-        }
+    /**
+     * Request a QR code model for the banner config
+     */
+    override fun getQrCode(banner: IBannerConfig): Flow<Resource<QRCode>> {
+        if (banner !is BannerConfig) return emptyFlow()
+        return repository.getQRCode(banner.qrCodeRequestUrl)
+            .filter { it !is Resource.Loading }
+            .retryIfFailed { res, attempt ->
+                handleRetry(res, attempt, QR_RETRY_MAX_ATTEMPT, "Get QR exception")
+            }
     }
 
+    /**
+     * Request image bytes for QR code
+     */
     override fun getQrCodeBytes(qrCode: QRCode) =
         repository.getQrCodeBytes(qrCode.generateUrl)
             .filter { it !is Resource.Loading }
@@ -114,25 +113,30 @@ internal class ConfigLoader(
                 handleRetry(res, attempt, QR_RETRY_MAX_ATTEMPT, "Get QR Image exception")
             }
 
+    /**
+     * Check that the QR code was scanned by user
+     */
     override fun checkQrCode(bannerId: String, qrCode: QRCode): Flow<Boolean> =
         repository.checkQRCode(qrCode.checkUrl)
             .retryUntilFail(qrCode.checkInterval)
             .filter { it is Resource.Fail }
-            .onEach {
-                // drop used QR code status
-                updateQRCodeStatus(bannerId, Resource.Loading)
-            }
             .map { true }
 
-    private val updateStatusMutex = Mutex()
-    private suspend fun updateQRCodeStatus(bannerId: String, status: Resource<QRCode>) {
-        updateStatusMutex.withLock {
-            val statusMap = _qrCodesStatus.value.toMutableMap()
-                .apply { this[bannerId] = status }
-            _qrCodesStatus.emit(statusMap)
-        }
+    /**
+     * Request an Interstitial model with a landing data
+     */
+    override fun getInterstitialLanding(banner: IBannerConfig): Flow<Resource<InterstitialLanding>> {
+        if (banner !is InterstitialConfig) return emptyFlow()
+        return repository.getInterstitialLanding(banner.interstitialUrl)
+            .filter { it !is Resource.Loading }
+            .retryIfFailed { res, attempt ->
+                handleRetry(res, attempt, QR_RETRY_MAX_ATTEMPT, "Get QR exception")
+            }
     }
 
+    /**
+     * Post the success impression
+     */
     override fun callbackImpression(url: String) {
         launch {
             Logger.d("Invoke impression callback: $url")

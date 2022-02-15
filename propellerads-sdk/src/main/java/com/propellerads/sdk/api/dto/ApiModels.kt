@@ -132,7 +132,7 @@ internal data class BannerSettingsRes(
     }
 }
 
-internal data class QRCodeSettingsRes(
+internal data class QRCodeRes(
     val checkUrl: String,
     val generateUrl: String,
     val refreshUrl: String,
@@ -187,6 +187,14 @@ internal data class InterstitialSettingsRes(
         )
         return appearance to impression
     }
+}
+
+internal data class InterstitialLandingRes(
+    val landingUrl: String,
+) : Mappable<InterstitialLanding> {
+    override fun map() = InterstitialLanding(
+        landingUrl = landingUrl,
+    )
 }
 
 internal object OkRes : Mappable<OK> {

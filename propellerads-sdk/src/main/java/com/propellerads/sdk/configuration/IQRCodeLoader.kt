@@ -7,9 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 internal interface IQRCodeLoader {
 
-    val qrCodesStatus: Flow<Map<String, Resource<QRCode>>>
-
-    fun getQrCode(banner: IBannerConfig)
+    fun getQrCode(banner: IBannerConfig): Flow<Resource<QRCode>>
 
     fun getQrCodeBytes(qrCode: QRCode): Flow<Resource<ByteArray>>
 

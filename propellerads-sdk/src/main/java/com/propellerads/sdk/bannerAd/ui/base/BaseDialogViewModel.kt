@@ -29,7 +29,7 @@ internal abstract class BaseDialogViewModel : ViewModel(), CoroutineScope {
         launch {
             while (isActive) {
                 delay(1000)
-                // Compare with the current time to prevent the timer being interrupted
+                // Compare with the current time to prevent the timer being paused
                 // when the App in the background
                 if (System.currentTimeMillis() >= dismissTime) {
                     Logger.d("Dismiss by the Timer", TAG)

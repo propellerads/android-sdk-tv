@@ -130,7 +130,7 @@ internal class MockApi : IApi {
         return OkRes
     }
 
-    override suspend fun getQRCode(url: String): QRCodeSettingsRes {
+    override suspend fun getQRCode(url: String): QRCodeRes {
         delay(1000)
 
         val isRandomException = false
@@ -140,7 +140,7 @@ internal class MockApi : IApi {
             )
         }
 
-        return QRCodeSettingsRes(
+        return QRCodeRes(
             checkUrl = "https://propeller.backend/checkUrl",
             generateUrl = "https://propeller.backend/generateUrl",
             refreshUrl = "https://propeller.backend/refreshUrl",
@@ -172,5 +172,13 @@ internal class MockApi : IApi {
         delay(1000)
         val qrBytesString = Base64.decode(qrTest, Base64.DEFAULT).toByteString()
         return qrBytesString.toResponseBody()
+    }
+
+    override suspend fun getInterstitialLanding(url: String): InterstitialLandingRes {
+        delay(1000)
+
+        return InterstitialLandingRes(
+            landingUrl = "https://www.google.com"
+        )
     }
 }

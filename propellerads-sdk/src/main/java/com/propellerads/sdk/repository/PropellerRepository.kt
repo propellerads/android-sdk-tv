@@ -38,4 +38,8 @@ internal class PropellerRepository(
     override fun checkQRCode(url: String) = execute(errorParser) {
         api.checkQRCode(url)
     }
+
+    override fun getInterstitialLanding(url: String) = execute(errorParser) {
+        api.getInterstitialLanding(url)
+    }
 }

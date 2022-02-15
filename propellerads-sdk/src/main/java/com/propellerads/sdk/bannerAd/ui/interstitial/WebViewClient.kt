@@ -8,8 +8,14 @@ import android.webkit.WebViewClient
 import com.propellerads.sdk.utils.Logger
 
 class WebViewClient(
-    private val redirectHandler: (Uri) -> Unit
+    private val onLandingLoadedHandler: () -> Unit,
+    private val landingClickHandler: () -> Unit,
 ) : WebViewClient() {
+
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+        onLandingLoadedHandler()
+    }
 
     // For API below 24
 
@@ -41,7 +47,7 @@ class WebViewClient(
         Logger.d("WebView redirect. Has gesture: $hasGesture; Url: $url")
 
         if (hasGesture == true) {
-            url?.let(redirectHandler)
+            landingClickHandler()
             return true
         }
 

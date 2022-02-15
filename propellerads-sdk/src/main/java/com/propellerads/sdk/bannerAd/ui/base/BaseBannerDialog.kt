@@ -43,18 +43,18 @@ internal abstract class BaseBannerDialog :
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val bannerConfig = getConfig()
-        if (bannerConfig == null) {
+        val config = getConfig()
+        if (config == null) {
             dismissSafely()
             return null
         }
 
-        return configureBanner(inflater, bannerConfig)
+        return configureBanner(inflater, config)
     }
 
     protected abstract fun configureBanner(
         inflater: LayoutInflater,
-        bannerConfig: IBannerConfig,
+        config: IBannerConfig,
     ): View?
 
     protected fun configureFullScreen(
@@ -119,6 +119,8 @@ internal abstract class BaseBannerDialog :
 
     override fun onResume() {
         super.onResume()
+        // Don't move this method to onCreate
+        // Coroutines stops on fragment pause to prevent update UI from background
         subscribeOnDismiss()
     }
 

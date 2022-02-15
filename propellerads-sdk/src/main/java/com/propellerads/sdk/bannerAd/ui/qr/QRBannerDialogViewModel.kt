@@ -34,11 +34,10 @@ internal class QRBannerDialogViewModel : BaseDialogViewModel() {
     }
 
     private fun getQrCode(config: IBannerConfig) {
-        qrCodeLoader.getQrCode(config)
         launch {
-            qrCodeLoader.qrCodesStatus
+            qrCodeLoader.getQrCode(config)
                 .mapNotNull { resource ->
-                    (resource[config.id] as? Resource.Success)?.data
+                    (resource as? Resource.Success)?.data
                 }
                 .collect { qrCode ->
                     qrCodeFlow.emit(qrCode)

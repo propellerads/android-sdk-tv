@@ -85,6 +85,10 @@ internal data class InterstitialConfig(
     override val impressionConfig: ImpressionConfig,
 ) : IInterstitialConfig
 
+internal data class InterstitialLanding(
+    val landingUrl: String,
+) : Serializable
+
 internal data class InterstitialAppearance(
     val showCrossTimer: Long,
 ) : Serializable
