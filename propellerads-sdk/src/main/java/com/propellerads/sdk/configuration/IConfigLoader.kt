@@ -4,4 +4,5 @@ internal interface IConfigLoader :
     IWidgetLoader,
     IBannerLoader,
     IQRCodeLoader,
-    ICallbackHandler
+    ICallbackHandler,
+    IInterstitialLoader

@@ -18,4 +18,6 @@ internal interface IPropellerRepository {
     fun getQrCodeBytes(url: String): Flow<Resource<ByteArray>>
 
     fun checkQRCode(url: String): Flow<Resource<OK>>
+
+    fun getInterstitialLanding(url: String): Flow<Resource<InterstitialLanding>>
 }

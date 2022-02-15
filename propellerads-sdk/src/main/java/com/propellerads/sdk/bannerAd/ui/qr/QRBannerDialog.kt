@@ -36,22 +36,22 @@ private constructor() : BaseBannerDialog() {
 
     override fun configureBanner(
         inflater: LayoutInflater,
-        bannerConfig: IBannerConfig
+        config: IBannerConfig
     ): View? {
 
-        if (bannerConfig !is IQRBannerConfig) {
+        if (config !is IQRBannerConfig) {
             dismissSafely()
             return null
         }
 
-        viewModel.setConfig(bannerConfig)
+        viewModel.setConfig(config)
 
-        configureDialogParams(bannerConfig.appearance)
+        configureDialogParams(config.appearance)
 
-        val binding = when (bannerConfig.appearance.layoutTemplate) {
+        val binding = when (config.appearance.layoutTemplate) {
             "qr_code_3_1" -> PropellerBannerQrBinding.inflate(inflater)
                 .apply {
-                    applyStyle(bannerConfig)
+                    applyStyle(config)
                     launch {
                         viewModel.qrCodeImageFlow
                             .collect(this@apply::setQRImage)
