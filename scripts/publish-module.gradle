@@ -1,8 +1,30 @@
 apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'signing'
+
+def jarFile = file("${project.buildDir}/libs/sdk-${publishVersion}.jar")
 
 artifacts {
     archives androidSourcesJar
+    archives jarFile
+}
+
+artifactory {
+    contextUrl = "http://artifactory01.rtty.in:8081/artifactory"
+    publish {
+        repository {
+            repoKey = "ext-snapshot-local"
+            username = "${artifactoryLogin}"
+            password = "${artifactoryPassword}"
+            maven = true
+        }  
+        authentication {
+            basic(BasicAuthentication)
+        }   
+        defaults {
+            publications ('release')
+        }
+    }
 }
 
 afterEvaluate {
@@ -20,6 +42,7 @@ afterEvaluate {
                 }
 
                 artifact androidSourcesJar
+                artifact jarFile
 
                 pom {
                     name = PUBLISH_ARTIFACT_ID
