@@ -3,11 +3,16 @@ package com.propellerads.sdk.utils
 import android.util.Log
 import com.propellerads.sdk.BuildConfig
 
-internal object Logger {
+internal interface ILogger {
+    fun d(message: String, suffix: String? = null)
+}
 
-    private const val TAG = "PropellerAdsSDK"
+internal object Logger : ILogger {
 
-    fun d(message: String) {
-        if (BuildConfig.DEBUG) Log.d(TAG, message)
+    private const val TAG = "AdSDK"
+
+    override fun d(message: String, suffix: String?) {
+        val tag = suffix?.let { "${TAG}_$suffix" } ?: TAG
+        if (BuildConfig.DEBUG) Log.d(tag, message)
     }
 }

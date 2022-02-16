@@ -1,32 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    <TextView
+        style="@style/TextAppearance.AppCompat.Display1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginVertical="8dp"
+        android:text="It is the first Activity" />
 
-        <com.propellerads.sdk.widget.PropellerButton
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="32dp"
-            app:widget_id="test_widget_1" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginVertical="8dp"
+        android:text="@string/lorem_ipsum_1"
+        android:textSize="14sp" />
 
-        <com.propellerads.sdk.widget.PropellerButton
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="32dp"
-            app:widget_id="test_widget_2" />
+    <com.propellerads.sdk.widget.PropellerButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginVertical="8dp"
+        app:widget_id="download_now_button" />
 
-        <com.propellerads.sdk.widget.PropellerButton
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="32dp"
-            app:widget_id="test_widget_3" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginVertical="8dp"
+        android:text="@string/lorem_ipsum_2"
+        android:textSize="14sp" />
 
-    </LinearLayout>
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="32dp"
+        android:text="Go to the next Activity" />
 
-</FrameLayout>
+</LinearLayout>
