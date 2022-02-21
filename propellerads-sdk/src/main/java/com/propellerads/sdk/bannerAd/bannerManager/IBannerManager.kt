@@ -1,7 +1,7 @@
 package com.propellerads.sdk.bannerAd.bannerManager
 
 import androidx.fragment.app.FragmentManager
-import com.propellerads.sdk.bannerAd.ui.IBannerConfig
+import com.propellerads.sdk.bannerAd.ui.base.IBannerConfig
 import kotlinx.coroutines.flow.Flow
 import java.lang.ref.WeakReference
 import java.util.*
