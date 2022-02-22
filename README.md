@@ -1,41 +1,55 @@
 # Propellerads Android SDK
+
 ## Installation guide
+
 ### Install from Maven Central repository:
+
 ```groovy
 implementation 'com.propellerads:sdk:x.x.x'
 ```
+
 ### Install from sources (Alternative):
+
 1. Copy `propellerads-sdk` directory to the desired Android project.
 2. Append the line `include ':propellerads-sdk'` to the `settings.gradle` file of the project.
 3. Add `implementation project(":propellerads-sdk")` to the dependency section of `build.gradle`.
 4. Synchronize the project with Gradle files.
 
 ## Integration guide
+
 ### Base integration
+
 1. Obtain `PublisherId` from Propellerads Administration.
 2. Add `PublisherId` as meta-data to the `AndroidManifest.xml` of the application.
+
 ```xml
-    <manifest>
-        <application>
-            <activity></activity>
-            <meta-data
-                android:name="com.propellerads.sdk.PublisherId"
-                android:value="XXXXXX" />
-        </application>
-    </manifest>
+
+<manifest>
+    <application>
+        <activity></activity>
+        <meta-data android:name="com.propellerads.sdk.PublisherId" android:value="XXXXXX" />
+    </application>
+</manifest>
 ```
+
 ### PropellerButton integration
+
 #### Application side configuration:
+
 1. Place the widget to the desired area of the layout.
+
 ```xml
-    <com.propellerads.sdk.widget.PropellerButton
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+
+<com.propellerads.sdk.widget.PropellerButton 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
         app:widget_id="xxxxxxxx" />
 ```
+
 2. Specify `app:widget_id` parameter with the value provided by Propellerads Administration.
 
 #### Server side configuration:
+
 | Parameter name | Json example | Description | Is required |
 | ------ | ------ | ------ | ------ |
 | buttonLabel | "Download Now" | Text string | true |
@@ -49,29 +63,35 @@ implementation 'com.propellerads:sdk:x.x.x'
 | buttonLabelAllCaps | true | Are label letters capitalized | false |
 | horizontalPadding | 24 | Horizontal paddings integer size. Android's default value is used if parameter not presented. | false |
 | verticalPadding | 24 | Vertical paddings integer size. Android's default value is used if parameter not presented. | false |
-### PropellerBanner integration
+
+### QR Banner integration
+
 #### Application side configuration:
+
 1. Create `PropellerBannerRequest` object in `onCreate()` method of `Activity` or `Fragment`.
 2. Pass required constructor parameters:
     * `adId` – request id provided by Propellerads Administration
     * `lifecycle` – `androidx.lifecycle.Lifecycle` object of `Activity` or `Fragment`.
     * `fragmentManager` – `supportFragmentManager` in case of `Activity` or `childFragmentManager` in case of `Fragment`.
     * `callback` – the object that will be notified of the `PropellerBanner` state change.
+
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     PropellerBannerRequest(
-        "qr_code_2",
+        "qr_code_id",
         lifecycle,
         childFragmentManager
     ) { isShow ->
-        val label = "${if (isShow) "Show" else "Hide"} banner callback (First Fragment)"
+        val label = "${if (isShow) "Show" else "Hide"} banner callback"
         Toast.makeText(context, label, Toast.LENGTH_SHORT).show()
     }
 }
 ```
+
 #### Server side configuration:
+
 | Parameter name | Json example | Description | Is required |
 | ------ | ------ | ------ | ------ |
 | layoutTemplate | "qr_code_3_1" | String id of the layout | true |
@@ -91,3 +111,29 @@ override fun onCreate(savedInstanceState: Bundle?) {
 | interval | 40 | Time interval between the banner impressions (seconds) | true |
 | capping | 120 | Frequency measurement time interval (seconds) | true |
 | frequency | 3 | Max impressions in capping time interval | true |
+
+### Interstitial Banner integration
+
+#### Application side configuration:
+
+1. Create `PropellerBannerRequest` object in `onCreate()` method of `Activity` or `Fragment`.
+2. Pass required constructor parameters:
+    * `adId` – request id provided by Propellerads Administration
+    * `lifecycle` – `androidx.lifecycle.Lifecycle` object of `Activity` or `Fragment`.
+    * `fragmentManager` – `supportFragmentManager` in case of `Activity` or `childFragmentManager` in case of `Fragment`.
+    * `callback` – the object that will be notified of the `PropellerBanner` state change.
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    PropellerBannerRequest(
+        "interstitial_id",
+        lifecycle,
+        supportFragmentManager
+    ) { isShow ->
+        val label = "${if (isShow) "Show" else "Hide"} interstitial callback"
+        Toast.makeText(this, label, Toast.LENGTH_SHORT).show()
+    }
+}
+```
