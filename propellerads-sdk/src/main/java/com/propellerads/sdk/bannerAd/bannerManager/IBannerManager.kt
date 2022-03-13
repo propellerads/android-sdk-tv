@@ -11,11 +11,13 @@ internal interface IBannerManager {
     fun dispatchConfig(
         requestUUID: UUID,
         bannerConfig: IBannerConfig,
+        uniqueSuffix: String,
         fm: WeakReference<FragmentManager>,
     )
 
     fun revokeConfig(
         requestUUID: UUID,
+        uniqueSuffix: String,
         fm: WeakReference<FragmentManager>,
     )
 

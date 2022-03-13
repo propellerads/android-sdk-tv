@@ -108,11 +108,11 @@ internal class MockApi : IApi {
 //                    interstitialUrl = "https://teu.myappluck.com/pydBRp?keyword=propeller&cost={cost}&currency=usd&external_id=\${SUBID}&creative_id={bannerid}&ad_campaign_id={campaignid}&source={zoneid}",
                     impressionUrl = "google.com",
                     settings = InterstitialSettingsRes(
-                        interval = 10,
-                        timeout = 3,
-                        frequency = 3,
+                        interval = 20,
+                        timeout = 5,
+                        frequency = 2,
                         capping = 120,
-                        showCrossTimer = 7
+                        showCrossTimer = 5
                     )
                 )
             )

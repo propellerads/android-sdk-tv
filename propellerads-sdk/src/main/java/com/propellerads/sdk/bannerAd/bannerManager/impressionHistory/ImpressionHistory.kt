@@ -5,15 +5,21 @@ class ImpressionHistory : IImpressionHistory {
     private val impressionsHistory = mutableMapOf<String, List<Long>>()
 
     @Synchronized
-    override fun add(configId: String, timestamp: Long) {
+    override fun add(configId: String, uniqueSuffix: String, timestamp: Long) {
+        val compositeKey = composeKey(configId, uniqueSuffix)
         val timestamps = impressionsHistory
-            .getOrElse(configId, { listOf() })
+            .getOrElse(compositeKey) { listOf() }
             .toMutableList()
             .apply { add(timestamp) }
-        impressionsHistory[configId] = timestamps
+        impressionsHistory[compositeKey] = timestamps
     }
 
     @Synchronized
-    override fun get(configId: String) =
-        impressionsHistory[configId] ?: emptyList()
+    override fun get(configId: String, uniqueSuffix: String): List<Long> {
+        val compositeKey = composeKey(configId, uniqueSuffix)
+        return impressionsHistory[compositeKey] ?: emptyList()
+    }
+
+    private fun composeKey(configId: String, uniqueSuffix: String) =
+        "$configId\\_$uniqueSuffix"
 }

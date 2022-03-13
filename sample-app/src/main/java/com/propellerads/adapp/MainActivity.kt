@@ -3,7 +3,6 @@ package com.propellerads.adapp
 import android.content.Intent
 import android.os.Bundle
 import android.webkit.WebView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.propellerads.adapp.databinding.ActivityMainBinding
 import com.propellerads.sdk.widget.PropellerBannerRequest
@@ -22,19 +21,14 @@ class MainActivity : AppCompatActivity() {
             "qr_code_1",
             lifecycle,
             supportFragmentManager
-        ) { isShow ->
-            val label = "${if (isShow) "Show" else "Hide"} banner callback (First Activity)"
-            Toast.makeText(this, label, Toast.LENGTH_SHORT).show()
-        }
+        )
 
         PropellerBannerRequest(
             "interstitial_test",
             lifecycle,
-            supportFragmentManager
-        ) { isShow ->
-            val label = "${if (isShow) "Show" else "Hide"} interstitial callback (First Activity)"
-            Toast.makeText(this, label, Toast.LENGTH_SHORT).show()
-        }
+            supportFragmentManager,
+            "main_activity"
+        )
 
         binding.next.setOnClickListener {
             val intent = Intent(this, SecondActivity::class.java)

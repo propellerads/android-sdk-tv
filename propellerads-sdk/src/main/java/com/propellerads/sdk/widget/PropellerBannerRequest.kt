@@ -19,6 +19,7 @@ class PropellerBannerRequest(
     private val adId: String,
     lifecycle: Lifecycle,
     fragmentManager: FragmentManager,
+    private val uniqueSuffix: String = "",
     private val callback: Callback = Callback { },
 ) : LifecycleEventObserver {
 
@@ -79,7 +80,7 @@ class PropellerBannerRequest(
 
     private fun handleAdConfiguration(bannerConfig: IBannerConfig) {
         Logger.d("Dispatch Banner config id: $adId", TAG)
-        bannerManager.dispatchConfig(requestUUID, bannerConfig, weakFM)
+        bannerManager.dispatchConfig(requestUUID, bannerConfig, uniqueSuffix, weakFM)
         coroutineScope.launch {
             bannerManager
                 .subscribeOnBannerStateChange(requestUUID)
@@ -92,7 +93,7 @@ class PropellerBannerRequest(
         job.cancelChildren()
 
         Logger.d("Revoke banner config id: $adId", TAG)
-        bannerManager.revokeConfig(requestUUID, weakFM)
+        bannerManager.revokeConfig(requestUUID, uniqueSuffix, weakFM)
     }
 
     fun interface Callback {

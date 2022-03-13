@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.propellerads.adapp.databinding.FragmentSecondBinding
+import com.propellerads.sdk.widget.PropellerBannerRequest
 
 class SecondFragment : Fragment() {
 
@@ -19,6 +20,13 @@ class SecondFragment : Fragment() {
             AlertFragment()
                 .show(childFragmentManager, null)
         }
+
+        PropellerBannerRequest(
+            "interstitial_test",
+            lifecycle,
+            childFragmentManager,
+            "second_fragment"
+        )
 
         return binding.root
     }

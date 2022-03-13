@@ -64,12 +64,13 @@ internal class BannerManager :
     override fun dispatchConfig(
         requestUUID: UUID,
         bannerConfig: IBannerConfig,
+        uniqueSuffix: String,
         fm: WeakReference<FragmentManager>,
     ) {
         if (!activeConfigs.containsKey(requestUUID)) {
             fm.get()?.registerFragmentLifecycleCallbacks(dismissListener, false)
             activeConfigs[requestUUID] = bannerConfig
-            scheduleBannerImpression(requestUUID, bannerConfig, fm, isNewConfig = true)
+            scheduleBannerImpression(requestUUID, bannerConfig, uniqueSuffix, fm, isNewConfig = true)
         } else {
             Logger.d("Already dispatched. Config id: ${bannerConfig.id}", TAG)
         }
@@ -78,6 +79,7 @@ internal class BannerManager :
     @Synchronized
     override fun revokeConfig(
         requestUUID: UUID,
+        uniqueSuffix: String,
         fm: WeakReference<FragmentManager>,
     ) {
         activeConfigs
@@ -96,6 +98,7 @@ internal class BannerManager :
     private fun scheduleBannerImpression(
         requestUUID: UUID,
         bannerConfig: IBannerConfig,
+        uniqueSuffix: String,
         fm: WeakReference<FragmentManager>,
         isNewConfig: Boolean = false,
     ) {
@@ -106,7 +109,7 @@ internal class BannerManager :
         }
 
         val displaySettings = bannerConfig.impressionConfig
-        val history = impressionHistory.get(bannerConfig.id)
+        val history = impressionHistory.get(bannerConfig.id, uniqueSuffix)
         val nextImpressionTime = calculateNextImpressionTime(displaySettings, history, isNewConfig)
 
         // The next impression is not possible
@@ -114,12 +117,12 @@ internal class BannerManager :
 
         val timeToNextImpression = nextImpressionTime - System.currentTimeMillis()
         if (timeToNextImpression < DISPLAY_NOW_THRESHOLD) {
-            checkConditionsAndDisplayBanner(requestUUID, bannerConfig, fm)
+            checkConditionsAndDisplayBanner(requestUUID, bannerConfig, uniqueSuffix, fm)
         } else {
             Logger.d("Banner for config ${bannerConfig.id} scheduled in ${timeToNextImpression / 1000.0} sec", TAG)
             scheduledImpressions[requestUUID] = launch {
                 delay(timeToNextImpression)
-                checkConditionsAndDisplayBanner(requestUUID, bannerConfig, fm)
+                checkConditionsAndDisplayBanner(requestUUID, bannerConfig, uniqueSuffix, fm)
             }
         }
     }
@@ -142,6 +145,7 @@ internal class BannerManager :
     private fun checkConditionsAndDisplayBanner(
         requestUUID: UUID,
         config: IBannerConfig,
+        uniqueSuffix: String,
         fragmentManager: WeakReference<FragmentManager>,
     ) {
         val bannerId = config.id
@@ -158,12 +162,12 @@ internal class BannerManager :
         // - schedule the new banner impression
         if (fm.findFragmentByTag(bannerId) != null) {
             Logger.d("Banner with the same id ($bannerId) is still visible", TAG)
-            updateHistoryAndScheduleNextBanner(requestUUID, config, fragmentManager)
+            updateHistoryAndScheduleNextBanner(requestUUID, config, uniqueSuffix, fragmentManager)
             return
         }
 
         displayBanner(requestUUID, config, fm)
-        updateHistoryAndScheduleNextBanner(requestUUID, config, fragmentManager)
+        updateHistoryAndScheduleNextBanner(requestUUID, config, uniqueSuffix, fragmentManager)
     }
 
     private fun displayBanner(
@@ -185,10 +189,11 @@ internal class BannerManager :
     private fun updateHistoryAndScheduleNextBanner(
         requestUUID: UUID,
         config: IBannerConfig,
+        uniqueSuffix: String,
         fragmentManager: WeakReference<FragmentManager>,
     ) {
-        impressionHistory.add(config.id, System.currentTimeMillis())
-        scheduleBannerImpression(requestUUID, config, fragmentManager, false)
+        impressionHistory.add(config.id, uniqueSuffix, System.currentTimeMillis())
+        scheduleBannerImpression(requestUUID, config, uniqueSuffix, fragmentManager, false)
     }
 
     private fun onBannerStateChanged(requestUUID: UUID, isShow: Boolean) {
