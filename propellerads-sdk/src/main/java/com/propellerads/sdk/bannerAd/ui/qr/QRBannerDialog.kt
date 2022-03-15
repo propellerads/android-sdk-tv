@@ -3,7 +3,7 @@ package com.propellerads.sdk.bannerAd.ui.qr
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.propellerads.sdk.bannerAd.ui.base.BaseBannerDialog
 import com.propellerads.sdk.bannerAd.ui.base.IBannerBuilder
 import com.propellerads.sdk.bannerAd.ui.base.IBannerConfig
@@ -29,7 +29,10 @@ private constructor() : BaseBannerDialog() {
         }
     }
 
-    private val viewModel: QRBannerDialogViewModel by viewModels()
+    private val viewModel by lazy {
+        ViewModelProvider(viewModelStore, defaultViewModelProviderFactory)
+            .get(QRBannerDialogViewModel::class.java)
+    }
 
     override val dismissFlow: Flow<Boolean>
         get() = viewModel.dismissFlow

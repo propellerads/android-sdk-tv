@@ -6,7 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.propellerads.sdk.bannerAd.ui.base.BaseBannerDialog
 import com.propellerads.sdk.bannerAd.ui.base.IBannerBuilder
 import com.propellerads.sdk.bannerAd.ui.base.IBannerConfig
@@ -38,7 +38,10 @@ private constructor() : BaseBannerDialog() {
         private const val TAG = "Banner"
     }
 
-    private val viewModel: InterstitialDialogViewModel by viewModels()
+    private val viewModel by lazy {
+        ViewModelProvider(viewModelStore, defaultViewModelProviderFactory)
+            .get(InterstitialDialogViewModel::class.java)
+    }
 
     override val dismissFlow: Flow<Boolean>
         get() = viewModel.dismissFlow
