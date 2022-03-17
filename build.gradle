@@ -3,11 +3,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url "http://artifactory01.rtty.in:8081/artifactory"
-            allowInsecureProtocol = true
-            name = "artifactory"
-        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.4'
