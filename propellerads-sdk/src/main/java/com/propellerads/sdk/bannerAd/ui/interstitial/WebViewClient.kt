@@ -1,10 +1,11 @@
 package com.propellerads.sdk.bannerAd.ui.interstitial
 
 import android.net.Uri
+import android.os.Build
 import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.RequiresApi
 import com.propellerads.sdk.utils.Logger
 
 class WebViewClient(
@@ -21,11 +22,8 @@ class WebViewClient(
 
     private var oldApiGestureHandled = false
 
-    override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
-        if (request?.hasGesture() == true) {
-            oldApiGestureHandled = true
-        }
-        return super.shouldInterceptRequest(view, request)
+    fun onGestureHandled() {
+        oldApiGestureHandled = true
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean =
@@ -34,6 +32,7 @@ class WebViewClient(
 
     // For API 24 and above
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun shouldOverrideUrlLoading(
         view: WebView?,
         request: WebResourceRequest?

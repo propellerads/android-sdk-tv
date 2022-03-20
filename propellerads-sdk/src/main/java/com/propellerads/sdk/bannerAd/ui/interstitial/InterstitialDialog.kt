@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.propellerads.sdk.bannerAd.ui.base.BaseBannerDialog
@@ -69,6 +70,7 @@ private constructor() : BaseBannerDialog() {
         return view
     }
 
+    @SuppressLint("ClickableViewAccessibility", "SetJavaScriptEnabled")
     private fun configureView(
         inflater: LayoutInflater,
     ): PropellerBannerInterstitionalBinding {
@@ -81,12 +83,21 @@ private constructor() : BaseBannerDialog() {
         val binding = PropellerBannerInterstitionalBinding.inflate(inflater)
         viewBinding = binding
 
+        val client = WebViewClient(
+            onLandingLoadedHandler = ::onLandingLoaded,
+            landingClickHandler = ::handleUserClickOnLanding
+        )
+
         binding.webView.run {
             settings.javaScriptEnabled = true
-            webViewClient = WebViewClient(
-                onLandingLoadedHandler = ::onLandingLoaded,
-                landingClickHandler = ::handleUserClickOnLanding
-            )
+            webViewClient = client
+
+            setOnTouchListener { _, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    client.onGestureHandled()
+                }
+                false
+            }
         }
 
         binding.closeBtn.setOnClickListener {
