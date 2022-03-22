@@ -1,25 +1,14 @@
 # Propellerads Android SDK
 
-## Installation guide
-
-### Install from Maven Central repository:
+### Download (Gradle)
 
 ```groovy
 implementation 'com.propellerads:sdk:x.x.x'
 ```
 
-### Install from sources (Alternative):
+### Base configuration
 
-1. Copy `propellerads-sdk` directory to the desired Android project.
-2. Append the line `include ':propellerads-sdk'` to the `settings.gradle` file of the project.
-3. Add `implementation project(":propellerads-sdk")` to the dependency section of `build.gradle`.
-4. Synchronize the project with Gradle files.
-
-## Integration guide
-
-### Base integration
-
-1. Obtain `PublisherId` from Propellerads Administration.
+1. Get `PublisherId` from PropellerAds Administration.
 2. Add `PublisherId` as meta-data to the `AndroidManifest.xml` of the application.
 
 ```xml
@@ -32,7 +21,13 @@ implementation 'com.propellerads:sdk:x.x.x'
 </manifest>
 ```
 
-### PropellerButton integration
+3. Initialize `PropellerAdsSDK` in the application `onCreate` method
+
+```kotlin
+PropellerAdsSDK.init(applicationContext)
+```
+
+### PropellerButton configuration
 
 #### Application side configuration:
 
@@ -40,9 +35,9 @@ implementation 'com.propellerads:sdk:x.x.x'
 
 ```xml
 
-<com.propellerads.sdk.widget.PropellerButton 
-        android:layout_width="match_parent" 
-        android:layout_height="wrap_content" 
+<com.propellerads.sdk.widget.PropellerButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:widget_id="xxxxxxxx" />
 ```
 
@@ -64,7 +59,7 @@ implementation 'com.propellerads:sdk:x.x.x'
 | horizontalPadding | 24 | Horizontal paddings integer size. Android's default value is used if parameter not presented. | false |
 | verticalPadding | 24 | Vertical paddings integer size. Android's default value is used if parameter not presented. | false |
 
-### QR Banner integration
+### QR Banner configuration
 
 #### Application side configuration:
 
@@ -112,7 +107,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 | capping | 120 | Frequency measurement time interval (seconds) | true |
 | frequency | 3 | Max impressions in capping time interval | true |
 
-### Interstitial Banner integration
+### Interstitial Banner configuration
 
 #### Application side configuration:
 
