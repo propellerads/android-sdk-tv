@@ -1,16 +1,16 @@
 package com.propellerads.sdk.di
 
 import android.content.Context
-import androidx.startup.Initializer
-import com.propellerads.sdk.BuildConfig
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.viewbinding.BuildConfig
 import com.propellerads.sdk.api.ApiConfig
 import com.propellerads.sdk.api.ApiErrorParser
 import com.propellerads.sdk.api.IApi
-import com.propellerads.sdk.api.MockApi
-import com.propellerads.sdk.configuration.ConfigLoader
-import com.propellerads.sdk.configuration.IConfigLoader
 import com.propellerads.sdk.bannerAd.bannerManager.BannerManager
 import com.propellerads.sdk.bannerAd.bannerManager.IBannerManager
+import com.propellerads.sdk.configuration.ConfigLoader
+import com.propellerads.sdk.configuration.IConfigLoader
 import com.propellerads.sdk.provider.adId.AdIdProvider
 import com.propellerads.sdk.provider.adId.IAdIdProvider
 import com.propellerads.sdk.provider.deviceType.DeviceTypeProvider
@@ -25,6 +25,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 internal object DI {
 
     private val httpClient = OkHttpClient.Builder()
@@ -50,10 +51,10 @@ internal object DI {
 
     val repo: IPropellerRepository = PropellerRepository(api, errorParser)
 
-    private lateinit var _configLoader: ConfigLoader
+    private var _configLoader: ConfigLoader? = null
 
     val configLoader: IConfigLoader
-        get() = _configLoader
+        get() = _configLoader ?: IConfigLoader.STUB
 
     val bannerManager: IBannerManager = BannerManager()
 
@@ -69,12 +70,4 @@ internal object DI {
             deviceTypeProvider,
         )
     }
-}
-
-/**
- * Initializer for startup-runtime
- */
-internal class DIInitializer : Initializer<DI> {
-    override fun create(context: Context) = DI.apply { init(context) }
-    override fun dependencies(): List<Class<out Initializer<*>>> = emptyList()
 }

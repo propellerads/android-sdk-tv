@@ -4,12 +4,14 @@ import android.content.Context
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
+import android.os.Build
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatButton
 import androidx.browser.customtabs.CustomTabsIntent
 import com.propellerads.sdk.R
@@ -23,7 +25,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlin.coroutines.CoroutineContext
 
-
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class PropellerButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -36,7 +38,7 @@ class PropellerButton @JvmOverloads constructor(
             get() = job + Dispatchers.Main
     }
 
-    private val adConfigurator = DI.configLoader
+    private val adConfigurator by lazy { DI.configLoader }
 
     private val button: AppCompatButton
     private val progress: ProgressBar
@@ -76,10 +78,16 @@ class PropellerButton @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        coroutineScope.launch {
-            adConfigurator.widgetsStatus
-                .combine(widgetIdState, ::Pair)
-                .collect(::handleConfigurationRes)
+        obtainConfiguration()
+    }
+
+    private fun obtainConfiguration() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            coroutineScope.launch {
+                adConfigurator.widgetsStatus
+                    .combine(widgetIdState, ::Pair)
+                    .collect(::handleConfigurationRes)
+            }
         }
     }
 
@@ -158,12 +166,14 @@ class PropellerButton @JvmOverloads constructor(
     }
 
     private fun handleClick(widgetConfig: WidgetConfig) {
-        if (widgetConfig.browserUrl.isNotEmpty()) {
-            if (context.hasCustomTabsBrowser()) {
-                adConfigurator.callbackImpression(widgetConfig.impressionUrl)
-                openBrowser(widgetConfig.browserUrl)
-            } else {
-                Logger.d("Android device does not support Web browsing")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (widgetConfig.browserUrl.isNotEmpty()) {
+                if (context.hasCustomTabsBrowser()) {
+                    adConfigurator.callbackImpression(widgetConfig.impressionUrl)
+                    openBrowser(widgetConfig.browserUrl)
+                } else {
+                    Logger.d("Android device does not support Web browsing")
+                }
             }
         }
     }

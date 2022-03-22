@@ -1,5 +1,6 @@
 package com.propellerads.adapp.fragments
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,12 +22,14 @@ class SecondFragment : Fragment() {
                 .show(childFragmentManager, null)
         }
 
-        PropellerBannerRequest(
-            "interstitial_test",
-            lifecycle,
-            childFragmentManager,
-            "second_fragment"
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            PropellerBannerRequest(
+                "interstitial_test",
+                lifecycle,
+                childFragmentManager,
+                "second_fragment"
+            )
+        }
 
         return binding.root
     }

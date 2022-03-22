@@ -11,7 +11,7 @@
         android:required="false" />
 
     <application
-        android:name="androidx.multidex.MultiDexApplication"
+        android:name="App"
         android:allowBackup="true"
         android:banner="@mipmap/ic_launcher_round"
         android:icon="@mipmap/ic_launcher"

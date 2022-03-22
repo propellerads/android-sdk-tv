@@ -1,5 +1,6 @@
 package com.propellerads.adapp.fragments
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,18 +15,20 @@ class FirstFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        PropellerBannerRequest(
-            "qr_code_2",
-            lifecycle,
-            childFragmentManager
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            PropellerBannerRequest(
+                "qr_code_2",
+                lifecycle,
+                childFragmentManager
+            )
 
-        PropellerBannerRequest(
-            "interstitial_test",
-            lifecycle,
-            childFragmentManager,
-            "first_fragment"
-        )
+            PropellerBannerRequest(
+                "interstitial_test",
+                lifecycle,
+                childFragmentManager,
+                "first_fragment"
+            )
+        }
     }
 
     override fun onCreateView(

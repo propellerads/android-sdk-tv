@@ -1,5 +1,7 @@
 package com.propellerads.sdk.widget
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -15,6 +17,7 @@ import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class PropellerBannerRequest(
     private val adId: String,
     lifecycle: Lifecycle,
