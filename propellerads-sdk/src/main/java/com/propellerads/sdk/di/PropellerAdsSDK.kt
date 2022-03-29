@@ -10,6 +10,7 @@ object PropellerAdsSDK {
     private var isInitialized: Boolean = false
 
     @Synchronized
+    @JvmStatic
     fun init(applicationContext: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (!isInitialized) {
