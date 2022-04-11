@@ -19,15 +19,16 @@ class MainActivity : AppCompatActivity() {
             PropellerBannerRequest(
                 "qr_code_1",
                 lifecycle,
-                supportFragmentManager
-            )
+                supportFragmentManager,
+                "",
+            ) {  }
 
             PropellerBannerRequest(
                 "interstitial_test",
                 lifecycle,
                 supportFragmentManager,
-                "main_activity"
-            )
+                "main_activity",
+            ) {  }
         }
 
         binding.next.setOnClickListener {

@@ -19,15 +19,16 @@ class FirstFragment : Fragment() {
             PropellerBannerRequest(
                 "qr_code_2",
                 lifecycle,
-                childFragmentManager
-            )
+                childFragmentManager,
+                ""
+            ) {}
 
             PropellerBannerRequest(
                 "interstitial_test",
                 lifecycle,
                 childFragmentManager,
-                "first_fragment"
-            )
+                "first_fragment",
+            ) {}
         }
     }
 

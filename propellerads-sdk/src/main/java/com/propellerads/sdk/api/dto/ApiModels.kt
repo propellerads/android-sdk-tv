@@ -191,9 +191,11 @@ internal data class InterstitialSettingsRes(
 
 internal data class InterstitialLandingRes(
     val landingUrl: String,
+    val isExternalLanding: Boolean,
 ) : Mappable<InterstitialLanding> {
     override fun map() = InterstitialLanding(
         landingUrl = landingUrl,
+        isExternalLanding = isExternalLanding,
     )
 }
 

@@ -12,13 +12,14 @@ import com.propellerads.sdk.bannerAd.ui.base.BaseBannerDialog
 import com.propellerads.sdk.bannerAd.ui.base.IBannerBuilder
 import com.propellerads.sdk.bannerAd.ui.base.IBannerConfig
 import com.propellerads.sdk.databinding.PropellerBannerInterstitionalBinding
+import com.propellerads.sdk.repository.InterstitialLanding
 import com.propellerads.sdk.utils.Logger
+import com.propellerads.sdk.utils.UriSafeParser
 import com.propellerads.sdk.utils.hasCustomTabsBrowser
 import com.propellerads.sdk.utils.isVisible
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -50,7 +51,7 @@ private constructor() : BaseBannerDialog() {
     private var viewBinding: PropellerBannerInterstitionalBinding? = null
 
     @Volatile
-    private var landingUrl: String? = null
+    private var landingData: InterstitialLanding? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun configureBanner(
@@ -111,25 +112,28 @@ private constructor() : BaseBannerDialog() {
         viewBinding?.progress?.isVisible = false
     }
 
-    private fun handleUserClickOnLanding() {
+    private fun handleUserClickOnLanding(webViewUri: Uri?) {
         viewModel.dismissBanner()
-        val uri = getLandingUri()
+
+        val landing = landingData ?: return
+        val isExternalLanding = landing.isExternalLanding
+        val uri = if (isExternalLanding) {
+            webViewUri
+        } else {
+            UriSafeParser.parse(landing.landingUrl)
+        }
+
         if (uri == null) {
             Logger.d("Landing URL is empty or damaged", TAG)
             return
         }
+
         if (requireContext().hasCustomTabsBrowser()) {
             viewModel.callbackImpression()
             openBrowser(uri)
         } else {
             Logger.d("Android device does not support Web browsing", TAG)
         }
-    }
-
-    private fun getLandingUri(): Uri? = try {
-        Uri.parse(landingUrl)
-    } catch (e: Exception) {
-        null
     }
 
     private fun openBrowser(url: Uri) {
@@ -150,15 +154,14 @@ private constructor() : BaseBannerDialog() {
         launch {
             viewModel.landingFlow
                 .filterNotNull()
-                .map { it.landingUrl }
                 .collect(::displayLandingInWebView)
         }
     }
 
-    private fun displayLandingInWebView(url: String) {
-        if (landingUrl == null) {
-            landingUrl = url
-            viewBinding?.webView?.loadUrl(url)
+    private fun displayLandingInWebView(landing: InterstitialLanding) {
+        if (landingData == null) {
+            landingData = landing
+            viewBinding?.webView?.loadUrl(landing.landingUrl)
         }
     }
 

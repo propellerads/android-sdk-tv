@@ -7,10 +7,11 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import com.propellerads.sdk.utils.Logger
+import com.propellerads.sdk.utils.UriSafeParser
 
 class WebViewClient(
     private val onLandingLoadedHandler: () -> Unit,
-    private val landingClickHandler: () -> Unit,
+    private val landingClickHandler: (uri: Uri?) -> Unit,
 ) : WebViewClient() {
 
     override fun onPageFinished(view: WebView?, url: String?) {
@@ -27,7 +28,7 @@ class WebViewClient(
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean =
-        baseShouldOverrideUrlLoading(Uri.parse(url), oldApiGestureHandled)
+        baseShouldOverrideUrlLoading(UriSafeParser.parse(url), oldApiGestureHandled)
 
 
     // For API 24 and above
@@ -40,13 +41,13 @@ class WebViewClient(
 
 
     private fun baseShouldOverrideUrlLoading(
-        url: Uri?,
+        uri: Uri?,
         hasGesture: Boolean?
     ): Boolean {
-        Logger.d("WebView redirect. Has gesture: $hasGesture; Url: $url")
+        Logger.d("WebView redirect. Has gesture: $hasGesture; Url: $uri")
 
         if (hasGesture == true) {
-            landingClickHandler()
+            landingClickHandler(uri)
             return true
         }
 

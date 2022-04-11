@@ -71,9 +71,9 @@ internal enum class BannerGravity {
 internal data class QRCode(
     val checkUrl: String,
     val generateUrl: String,
-    val refreshUrl: String,     // not used in POC
-    val qrCodeTtl: Long,        // not used in POC
-    val linksExpiredAt: Long,   // not used in POC
+    val refreshUrl: String,     // is not used in POC
+    val qrCodeTtl: Long,        // is not used in POC
+    val linksExpiredAt: Long,   // is not used in POC
     val checkInterval: Long,
 ) : Serializable
 
@@ -87,6 +87,7 @@ internal data class InterstitialConfig(
 
 internal data class InterstitialLanding(
     val landingUrl: String,
+    val isExternalLanding: Boolean,
 ) : Serializable
 
 internal data class InterstitialAppearance(

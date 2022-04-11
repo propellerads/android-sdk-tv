@@ -178,7 +178,8 @@ internal class MockApi : IApi {
         delay(1000)
 
         return InterstitialLandingRes(
-            landingUrl = "https://www.google.com"
+            landingUrl = "https://www.google.com",
+            isExternalLanding = true,
         )
     }
 }

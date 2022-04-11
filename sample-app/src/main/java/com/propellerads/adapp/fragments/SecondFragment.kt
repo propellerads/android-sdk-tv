@@ -28,7 +28,7 @@ class SecondFragment : Fragment() {
                 lifecycle,
                 childFragmentManager,
                 "second_fragment"
-            )
+            ) {}
         }
 
         return binding.root

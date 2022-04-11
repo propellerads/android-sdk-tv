@@ -3,7 +3,7 @@ package com.propellerads.sdk.di
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.viewbinding.BuildConfig
+import com.propellerads.sdk.BuildConfig
 import com.propellerads.sdk.api.ApiConfig
 import com.propellerads.sdk.api.ApiErrorParser
 import com.propellerads.sdk.api.IApi

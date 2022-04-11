@@ -10,10 +10,22 @@ import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTI
 
 
 internal object Colors {
-    fun from(color: String?) = try {
-        Color.parseColor(color)
-    } catch (e: Exception) {
-        Color.WHITE
+    fun from(color: String?) = color?.let {
+        try {
+            Color.parseColor(color)
+        } catch (e: Exception) {
+            null
+        }
+    } ?: Color.WHITE
+}
+
+internal object UriSafeParser {
+    fun parse(uri: String?) = uri?.let {
+        try {
+            Uri.parse(uri)
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 
