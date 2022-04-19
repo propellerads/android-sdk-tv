@@ -86,12 +86,14 @@ internal data class InterstitialConfig(
 ) : IInterstitialConfig
 
 internal data class InterstitialLanding(
+    val isSuccess: Boolean,
     val landingUrl: String,
     val isExternalLanding: Boolean,
 ) : Serializable
 
 internal data class InterstitialAppearance(
     val showCrossTimer: Long,
+    val loadingTimeout: Long,
 ) : Serializable
 
 internal object OK

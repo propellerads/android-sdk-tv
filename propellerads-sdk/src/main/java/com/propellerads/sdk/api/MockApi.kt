@@ -112,7 +112,8 @@ internal class MockApi : IApi {
                         timeout = 5,
                         frequency = 2,
                         capping = 120,
-                        showCrossTimer = 5
+                        showCrossTimer = 5,
+                        landingLoadTimeout = 5,
                     )
                 )
             )
@@ -178,6 +179,7 @@ internal class MockApi : IApi {
         delay(1000)
 
         return InterstitialLandingRes(
+            success = true,
             landingUrl = "https://www.google.com",
             isExternalLanding = true,
         )

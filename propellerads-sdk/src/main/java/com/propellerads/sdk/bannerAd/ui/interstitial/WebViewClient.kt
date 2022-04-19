@@ -1,22 +1,43 @@
 package com.propellerads.sdk.bannerAd.ui.interstitial
 
 import android.net.Uri
+import android.net.http.SslError
 import android.os.Build
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
+import android.webkit.*
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import com.propellerads.sdk.utils.Logger
 import com.propellerads.sdk.utils.UriSafeParser
 
 class WebViewClient(
-    private val onLandingLoadedHandler: () -> Unit,
-    private val landingClickHandler: (uri: Uri?) -> Unit,
+    private val onPageFinished: () -> Unit,
+    private val onPageFailed: () -> Unit,
+    private val onLandingClicked: (uri: String?) -> Unit,
 ) : WebViewClient() {
 
     override fun onPageFinished(view: WebView?, url: String?) {
-        super.onPageFinished(view, url)
-        onLandingLoadedHandler()
+        onPageFinished()
+    }
+
+
+    override fun onReceivedHttpError(
+        view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?
+    ) {
+        // This works on API 23 and above.
+        // No way to determine an http error in previous API versions.
+        onPageFailed()
+    }
+
+    override fun onReceivedError(
+        view: WebView?, request: WebResourceRequest?, error: WebResourceError?
+    ) {
+        onPageFailed()
+    }
+
+    override fun onReceivedSslError(
+        view: WebView?, handler: SslErrorHandler?, error: SslError?
+    ) {
+        onPageFailed()
     }
 
     // For API below 24
@@ -47,7 +68,7 @@ class WebViewClient(
         Logger.d("WebView redirect. Has gesture: $hasGesture; Url: $uri")
 
         if (hasGesture == true) {
-            landingClickHandler(uri)
+            onLandingClicked(uri?.toString())
             return true
         }
 

@@ -138,6 +138,10 @@ internal class ConfigLoader(
      * Post the success impression
      */
     override fun callbackImpression(url: String) {
+        if (url.isEmpty()) {
+            Logger.d("Impression callback url is empty")
+            return
+        }
         launch {
             Logger.d("Invoke impression callback: $url")
             repository.impressionCallback(url)

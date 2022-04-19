@@ -173,10 +173,12 @@ internal data class InterstitialSettingsRes(
     val frequency: Int,
     val capping: Int,
     val showCrossTimer: Long,
+    val landingLoadTimeout: Long,
 ) : Mappable<Pair<InterstitialAppearance, ImpressionConfig>> {
     override fun map(): Pair<InterstitialAppearance, ImpressionConfig> {
         val appearance = InterstitialAppearance(
             showCrossTimer = showCrossTimer * MILLISECONDS,
+            loadingTimeout = landingLoadTimeout * MILLISECONDS,
         )
 
         val impression = ImpressionConfig(
@@ -190,10 +192,12 @@ internal data class InterstitialSettingsRes(
 }
 
 internal data class InterstitialLandingRes(
+    val success: Boolean,
     val landingUrl: String,
     val isExternalLanding: Boolean,
 ) : Mappable<InterstitialLanding> {
     override fun map() = InterstitialLanding(
+        isSuccess = success,
         landingUrl = landingUrl,
         isExternalLanding = isExternalLanding,
     )
