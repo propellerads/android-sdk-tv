@@ -89,6 +89,7 @@ private constructor() : BaseBannerDialog() {
 
         binding.webView.run {
             settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
             webViewClient = client
 
             setOnTouchListener { _, event ->
