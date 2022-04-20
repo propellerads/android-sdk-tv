@@ -80,7 +80,6 @@ internal data class QRCode(
 internal data class InterstitialConfig(
     override val id: String,
     override val interstitialUrl: String,
-    override val impressionUrl: String,
     override val appearance: InterstitialAppearance,
     override val impressionConfig: ImpressionConfig,
 ) : IInterstitialConfig
@@ -88,6 +87,7 @@ internal data class InterstitialConfig(
 internal data class InterstitialLanding(
     val isSuccess: Boolean,
     val landingUrl: String,
+    val impressionUrl: String,
     val isExternalLanding: Boolean,
 ) : Serializable
 

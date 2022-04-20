@@ -26,7 +26,6 @@ internal class InterstitialDialogViewModel : BaseDialogViewModel() {
     val viewCommandFlow: StateFlow<InterstitialCommand?>
         get() = _viewCommandFlow
 
-    private var config: IInterstitialConfig? = null
     private var landingData: InterstitialLanding? = null
 
     @Volatile
@@ -36,8 +35,6 @@ internal class InterstitialDialogViewModel : BaseDialogViewModel() {
     private var isPageFailed = false
 
     fun setConfig(config: IInterstitialConfig) {
-
-        this.config = config
         getInterstitialLanding(config)
 
         val appearance = config.appearance
@@ -132,8 +129,8 @@ internal class InterstitialDialogViewModel : BaseDialogViewModel() {
     }
 
     private fun callbackImpression() {
-        config?.let { config ->
-            val impressionUrl = config.impressionUrl
+        landingData?.let { data ->
+            val impressionUrl = data.impressionUrl
             if (impressionUrl.isNotBlank()) {
                 callbackHandler.callbackImpression(impressionUrl)
             }

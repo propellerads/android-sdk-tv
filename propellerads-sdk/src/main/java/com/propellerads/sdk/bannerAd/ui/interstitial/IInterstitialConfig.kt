@@ -5,6 +5,5 @@ import com.propellerads.sdk.repository.InterstitialAppearance
 
 internal interface IInterstitialConfig : IBannerConfig {
     val interstitialUrl: String
-    val impressionUrl: String
     val appearance: InterstitialAppearance
 }

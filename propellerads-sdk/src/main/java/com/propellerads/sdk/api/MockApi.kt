@@ -106,7 +106,6 @@ internal class MockApi : IApi {
                     interstitialUrl = "https://www.knowtop.top/",
 //                    interstitialUrl = "https://www.knowtop.top/test-stitial",
 //                    interstitialUrl = "https://teu.myappluck.com/pydBRp?keyword=propeller&cost={cost}&currency=usd&external_id=\${SUBID}&creative_id={bannerid}&ad_campaign_id={campaignid}&source={zoneid}",
-                    impressionUrl = "google.com",
                     settings = InterstitialSettingsRes(
                         interval = 20,
                         timeout = 5,
@@ -181,6 +180,7 @@ internal class MockApi : IApi {
         return InterstitialLandingRes(
             success = true,
             landingUrl = "https://www.google.com",
+            impressionUrl = "https://www.google.com",
             isExternalLanding = true,
         )
     }

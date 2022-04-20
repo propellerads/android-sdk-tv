@@ -153,14 +153,12 @@ internal data class QRCodeRes(
 internal data class InterstitialRes(
     val id: String,
     val interstitialUrl: String,
-    val impressionUrl: String,
     val settings: InterstitialSettingsRes,
 ) : Mappable<InterstitialConfig> {
     override fun map() = settings.map().let { (appearance, impressionConfig) ->
         InterstitialConfig(
             id = id,
             interstitialUrl = interstitialUrl,
-            impressionUrl = impressionUrl,
             appearance = appearance,
             impressionConfig = impressionConfig,
         )
@@ -194,11 +192,13 @@ internal data class InterstitialSettingsRes(
 internal data class InterstitialLandingRes(
     val success: Boolean,
     val landingUrl: String,
+    val impressionUrl: String,
     val isExternalLanding: Boolean,
 ) : Mappable<InterstitialLanding> {
     override fun map() = InterstitialLanding(
         isSuccess = success,
         landingUrl = landingUrl,
+        impressionUrl = impressionUrl,
         isExternalLanding = isExternalLanding,
     )
 }
