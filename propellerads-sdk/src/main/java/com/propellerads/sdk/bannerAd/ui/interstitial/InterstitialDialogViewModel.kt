@@ -107,6 +107,8 @@ internal class InterstitialDialogViewModel : BaseDialogViewModel() {
     }
 
     fun onPageFinished() {
+        if (isPageFinished) return
+
         isPageFinished = true
         postViewCommand(InterstitialCommand.SetProgressVisibility(false))
         if (!isPageFailed) {

@@ -146,7 +146,8 @@ internal class ConfigLoader(
             Logger.d("Invoke impression callback: $url")
             repository.impressionCallback(url)
                 .retryIfFailed { res, attempt ->
-                    handleRetry(res, attempt, Long.MAX_VALUE, "Post Impression exception")
+                    res.isNetworkException() &&
+                            handleRetry(res, attempt, Long.MAX_VALUE, "Post Impression exception")
                 }
                 .collect()
         }
