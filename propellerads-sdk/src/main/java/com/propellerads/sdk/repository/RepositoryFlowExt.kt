@@ -25,7 +25,7 @@ internal fun <T> Flow<T>.retryIfFailed(
     do {
         shallRetry = false
         collect { res ->
-            if (res is Resource.Fail) {
+            if (res is Resource.Fail && !res.isParserException()) {
                 if (this.predicate(res, attempt)) {
                     shallRetry = true
                     attempt++
