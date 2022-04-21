@@ -6,8 +6,9 @@ import androidx.annotation.RequiresApi
 import com.propellerads.sdk.BuildConfig
 import com.propellerads.sdk.api.ApiConfig
 import com.propellerads.sdk.api.ApiErrorParser
-import com.propellerads.sdk.api.CookieHeaderInterceptor
 import com.propellerads.sdk.api.IApi
+import com.propellerads.sdk.api.interceptor.CookieHeaderInterceptor
+import com.propellerads.sdk.api.interceptor.DeviceDataInterceptor
 import com.propellerads.sdk.bannerAd.bannerManager.BannerManager
 import com.propellerads.sdk.bannerAd.bannerManager.IBannerManager
 import com.propellerads.sdk.configuration.ConfigLoader
@@ -43,10 +44,12 @@ internal object DI {
     private fun buildApi(context: Context): IApi {
         val userIdProvider: IUsedIdProvider = UsedIdProvider(context)
         val cookieInterceptor = CookieHeaderInterceptor(userIdProvider)
+        val deviceInterceptor = DeviceDataInterceptor()
 
         val httpClient = OkHttpClient.Builder()
             .apply {
                 addInterceptor(cookieInterceptor)
+                addInterceptor(deviceInterceptor)
                 if (BuildConfig.DEBUG) {
                     addInterceptor(
                         HttpLoggingInterceptor()

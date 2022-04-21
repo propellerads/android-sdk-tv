@@ -1,4 +1,4 @@
-package com.propellerads.sdk.api
+package com.propellerads.sdk.api.interceptor
 
 import com.propellerads.sdk.repository.IUsedIdProvider
 import okhttp3.Interceptor
