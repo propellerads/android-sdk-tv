@@ -21,14 +21,14 @@ class MainActivity : AppCompatActivity() {
                 lifecycle,
                 supportFragmentManager,
                 "",
-            ) {  }
+            ) { }
 
             PropellerBannerRequest(
                 "interstitial_test",
                 lifecycle,
                 supportFragmentManager,
                 "main_activity",
-            ) {  }
+            ) { }
         }
 
         binding.next.setOnClickListener {

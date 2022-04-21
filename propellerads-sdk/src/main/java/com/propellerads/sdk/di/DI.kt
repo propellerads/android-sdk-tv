@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import com.propellerads.sdk.BuildConfig
 import com.propellerads.sdk.api.ApiConfig
 import com.propellerads.sdk.api.ApiErrorParser
+import com.propellerads.sdk.api.CookieHeaderInterceptor
 import com.propellerads.sdk.api.IApi
 import com.propellerads.sdk.bannerAd.bannerManager.BannerManager
 import com.propellerads.sdk.bannerAd.bannerManager.IBannerManager
@@ -17,9 +18,7 @@ import com.propellerads.sdk.provider.deviceType.DeviceTypeProvider
 import com.propellerads.sdk.provider.deviceType.IDeviceTypeProvider
 import com.propellerads.sdk.provider.publisherId.IPublisherIdProvider
 import com.propellerads.sdk.provider.publisherId.PublisherIdProvider
-import com.propellerads.sdk.repository.IErrorParser
-import com.propellerads.sdk.repository.IPropellerRepository
-import com.propellerads.sdk.repository.PropellerRepository
+import com.propellerads.sdk.repository.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -27,29 +26,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 internal object DI {
-
-    private val httpClient = OkHttpClient.Builder()
-        .apply {
-            if (BuildConfig.DEBUG)
-                addInterceptor(
-                    HttpLoggingInterceptor()
-                        .setLevel(HttpLoggingInterceptor.Level.BODY)
-                )
-        }
-        .build()
-
-    private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(ApiConfig.BASE_URL)
-        .client(httpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val api: IApi = retrofit.create(IApi::class.java)
-//    private val api: IApi = MockApi()
-
-    private val errorParser: IErrorParser = ApiErrorParser()
-
-    val repo: IPropellerRepository = PropellerRepository(api, errorParser)
 
     private var _configLoader: ConfigLoader? = null
 
@@ -59,11 +35,48 @@ internal object DI {
     val bannerManager: IBannerManager = BannerManager()
 
     fun init(context: Context) {
+        val api = buildApi(context)
+        val repo = buildRepo(api)
+        _configLoader = buildConfigLoader(context, repo)
+    }
+
+    private fun buildApi(context: Context): IApi {
+        val userIdProvider: IUsedIdProvider = UsedIdProvider(context)
+        val cookieInterceptor = CookieHeaderInterceptor(userIdProvider)
+
+        val httpClient = OkHttpClient.Builder()
+            .apply {
+                addInterceptor(cookieInterceptor)
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(
+                        HttpLoggingInterceptor()
+                            .setLevel(HttpLoggingInterceptor.Level.BODY)
+                    )
+                }
+            }
+            .build()
+
+        val retrofit: Retrofit = Retrofit.Builder()
+            .baseUrl(ApiConfig.BASE_URL)
+            .client(httpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        return retrofit.create(IApi::class.java)
+//        return MockApi()
+    }
+
+    private fun buildRepo(api: IApi): IPropellerRepository {
+        val errorParser: IErrorParser = ApiErrorParser()
+        return PropellerRepository(api, errorParser)
+    }
+
+    private fun buildConfigLoader(context: Context, repo: IPropellerRepository): ConfigLoader {
         val adIdProvider: IAdIdProvider = AdIdProvider(context)
         val publisherIdProvider: IPublisherIdProvider = PublisherIdProvider(context)
         val deviceTypeProvider: IDeviceTypeProvider = DeviceTypeProvider(context)
 
-        _configLoader = ConfigLoader(
+        return ConfigLoader(
             repo,
             adIdProvider,
             publisherIdProvider,
