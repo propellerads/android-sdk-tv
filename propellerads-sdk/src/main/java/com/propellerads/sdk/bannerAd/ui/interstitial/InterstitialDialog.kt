@@ -157,6 +157,10 @@ private constructor() : BaseBannerDialog() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        viewBinding?.webView?.run {
+            removeAllViews()
+            destroy()
+        }
         viewBinding = null
     }
 }
