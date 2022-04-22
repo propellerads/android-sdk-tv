@@ -42,8 +42,8 @@ internal object DI {
     }
 
     private fun buildApi(context: Context): IApi {
-        val userIdProvider: IUsedIdProvider = UsedIdProvider(context)
-        val cookieInterceptor = CookieHeaderInterceptor(userIdProvider)
+        val userDataProvider: IUsedDataProvider = UsedDataProvider(context)
+        val cookieInterceptor = CookieHeaderInterceptor(userDataProvider)
         val deviceInterceptor = DeviceDataInterceptor()
 
         val httpClient = OkHttpClient.Builder()
