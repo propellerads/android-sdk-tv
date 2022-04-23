@@ -1,34 +1,28 @@
 package com.propellerads.sdk.api.interceptor
 
-import android.os.Build
+import com.propellerads.sdk.repository.IDeviceDataProvider
 import okhttp3.Interceptor
 import okhttp3.Response
 
-internal class DeviceDataInterceptor : Interceptor {
+internal class DeviceDataInterceptor(
+    deviceDataProvider: IDeviceDataProvider,
+) : Interceptor {
+
+    private var model: String = ""
+    private var version: String = ""
+
+    init {
+        this.model = deviceDataProvider.getDeviceModel()
+        val versionInt = deviceDataProvider.getAndroidVersion()
+        this.version = if (versionInt > 0) "$versionInt" else ""
+    }
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val device = getDeviceName()
-        val android = Build.VERSION.RELEASE
         val request = chain.request()
             .newBuilder()
-            .addHeader("device-model", device)
-            .addHeader("android-version", android)
+            .addHeader("device-model", model)
+            .addHeader("android-version", version)
             .build()
         return chain.proceed(request)
     }
-
-    private fun getDeviceName(): String {
-        val manufacturer: String = Build.MANUFACTURER
-        val model: String = Build.MODEL
-        return if (model.lowercase().startsWith(manufacturer.lowercase())) {
-            capitalize(model)
-        } else {
-            "${capitalize(manufacturer)} $model"
-        }
-    }
-
-    private fun capitalize(value: String) =
-        value.replaceFirstChar {
-            if (it.isLowerCase()) it.titlecase() else it.toString()
-        }
 }

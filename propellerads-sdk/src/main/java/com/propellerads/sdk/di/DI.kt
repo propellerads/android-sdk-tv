@@ -28,23 +28,24 @@ import retrofit2.converter.gson.GsonConverterFactory
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 internal object DI {
 
-    private var _configLoader: ConfigLoader? = null
+    private var configLoaderBacking: ConfigLoader? = null
 
     val configLoader: IConfigLoader
-        get() = _configLoader ?: IConfigLoader.STUB
+        get() = configLoaderBacking ?: IConfigLoader.STUB
 
     val bannerManager: IBannerManager = BannerManager()
 
     fun init(context: Context) {
         val api = buildApi(context)
         val repo = buildRepo(api)
-        _configLoader = buildConfigLoader(context, repo)
+        configLoaderBacking = buildConfigLoader(context, repo)
     }
 
     private fun buildApi(context: Context): IApi {
         val userDataProvider: IUsedDataProvider = UsedDataProvider(context)
+        val deviceDataProvider: IDeviceDataProvider = DeviceDataProvider()
         val cookieInterceptor = CookieHeaderInterceptor(userDataProvider)
-        val deviceInterceptor = DeviceDataInterceptor()
+        val deviceInterceptor = DeviceDataInterceptor(deviceDataProvider)
 
         val httpClient = OkHttpClient.Builder()
             .apply {
