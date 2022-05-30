@@ -64,7 +64,6 @@ internal class InterstitialDialogViewModel : BaseDialogViewModel() {
     }
 
     private fun startShowCrossTimer(timerValue: Long) {
-        if (timerValue == 0L) return
         val showTime = System.currentTimeMillis() + timerValue
 
         launch {
